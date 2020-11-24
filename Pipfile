@@ -5,8 +5,14 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
+xforge = {editable = true, path = "."}
+black = "*"
+flake8 = "*"
 
 [packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
