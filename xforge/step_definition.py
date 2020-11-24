@@ -1,7 +1,7 @@
 from typing import Dict, Set
 from abc import ABC, abstractmethod
 from .fileref import FileRef
-from .exceptions import FileSetError, XForgeError
+from .exceptions import FileSetError, CircularFileSetError, XForgeError
 
 PathDict = Dict[str, str]
 FileDict = Dict[str, FileRef]
@@ -23,6 +23,16 @@ class StepDefinition(ABC):
 
         if set(output_paths) != self.output_file_set:
             raise FileSetError(set(output_paths), self.output_file_set)
+
+        input_path_set = {input_paths[tag] for tag in input_paths}
+        output_path_set = {output_paths[tag] for tag in output_paths}
+        intersection = set.intersection(input_path_set, output_path_set)
+        if len(intersection):
+            raise CircularFileSetError(
+                "File included as both input and output: ".format(
+                    ", ".join(intersection)
+                )
+            )
 
         for f in input_paths:
             self.input_files[f] = FileRef(

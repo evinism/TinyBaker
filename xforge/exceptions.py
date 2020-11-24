@@ -17,3 +17,7 @@ class FileSetError(XForgeError):
                 "Missing files: {}".format(", ".join(list(actual - expected)))
             )
         super().__init__("; ".join(messages))
+
+
+class CircularFileSetError(XForgeError):
+    pass

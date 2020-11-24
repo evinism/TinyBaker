@@ -62,3 +62,21 @@ def test_fails_with_missing_paths():
             },
             output_paths={"baz": "./tests/__data__/baz.txt"},
         ).build()
+
+
+def test_fails_with_circular_inputs():
+    class BasicStep(StepDefinition):
+        input_file_set = {"foo", "bar"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            pass
+
+    with pytest.raises(XForgeError):
+        BasicStep(
+            input_paths={
+                "foo": "./tests/__data__/foo.txt",
+                "bar": "./tests/__data__/bar.txt",
+            },
+            output_paths={"baz": "./tests/__data__/foo.txt"},
+        ).build()
