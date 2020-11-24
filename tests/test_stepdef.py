@@ -1,6 +1,6 @@
 import pytest
 from xforge import StepDefinition
-from xforge.exceptions import FileSetError
+from xforge.exceptions import FileSetError, XForgeError
 
 
 def test_validate_paths():
@@ -43,4 +43,22 @@ def test_opens_local_paths():
             "bar": "./tests/__data__/bar.txt",
         },
         output_paths={"baz": "./tests/__data__/baz.txt"},
-    ).build()
+    ).build(overwrite=True)
+
+
+def test_fails_with_missing_paths():
+    class BasicStep(StepDefinition):
+        input_file_set = {"foo", "bar"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            pass
+
+    with pytest.raises(XForgeError):
+        BasicStep(
+            input_paths={
+                "foo": "./tests/__data__/foo.txt",
+                "faux": "./tests/__data__/bar.txt",
+            },
+            output_paths={"baz": "./tests/__data__/baz.txt"},
+        ).build()

@@ -1,7 +1,11 @@
 from typing import Set
 
 
-class FileSetError(Exception):
+class XForgeError(Exception):
+    pass
+
+
+class FileSetError(XForgeError):
     def __init__(self, actual: Set[str], expected: Set[str]):
         messages = []
         if len(actual - expected) > 0:
