@@ -1,5 +1,7 @@
 # tinybaker: Lightweight file-to-file build tool built for production workloads
 
+`pip install tinybaker`
+
 This is a "working" example of a script that builds an ml model from given train and test dataframes.
 
 ```py
