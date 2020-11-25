@@ -1,11 +1,11 @@
 from typing import Set
 
 
-class XForgeError(Exception):
+class BakerError(Exception):
     pass
 
 
-class FileSetError(XForgeError):
+class FileSetError(BakerError):
     def __init__(self, actual: Set[str], expected: Set[str]):
         messages = []
         if len(actual - expected) > 0:
@@ -19,5 +19,5 @@ class FileSetError(XForgeError):
         super().__init__("; ".join(messages))
 
 
-class CircularFileSetError(XForgeError):
+class CircularFileSetError(BakerError):
     pass

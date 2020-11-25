@@ -1,7 +1,7 @@
 from typing import Dict, Set
 from abc import ABC, abstractmethod
 from .fileref import FileRef
-from .exceptions import FileSetError, CircularFileSetError, XForgeError
+from .exceptions import FileSetError, CircularFileSetError, BakerError
 
 PathDict = Dict[str, str]
 FileDict = Dict[str, FileRef]
@@ -48,13 +48,13 @@ class StepDefinition(ABC):
         for tag in self.input_files:
             file_ref = self.input_files[tag]
             if not file_ref.exists():
-                raise XForgeError(
+                raise BakerError(
                     "Referenced input path {} does not exist!".format(file_ref.path)
                 )
         for tag in self.output_files:
             file_ref = self.output_files[tag]
             if file_ref.exists() and not overwrite:
-                raise XForgeError(
+                raise BakerError(
                     "Referenced output path {} already exists, and overwrite is not enabled".format(
                         file_ref.path
                     )

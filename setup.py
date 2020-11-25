@@ -6,14 +6,14 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name="xforge",
+    name="littlebaker",
     version="0.0.1",
     author="Evin Sellin",
     author_email="evinism@gmail.com",
     description="Lightweight file-to-file build tool built for production workloads",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/xforge",
+    url="https://github.com/pypa/minibaker",
     packages=find_packages(),
     install_requires=['fs'],
     classifiers=[

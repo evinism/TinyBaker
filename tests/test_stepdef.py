@@ -1,6 +1,6 @@
 import pytest
-from xforge import StepDefinition
-from xforge.exceptions import FileSetError, XForgeError
+from littlebaker import StepDefinition
+from littlebaker.exceptions import FileSetError, BakerError
 
 
 def test_validate_paths():
@@ -54,7 +54,7 @@ def test_fails_with_missing_paths():
         def script(self):
             pass
 
-    with pytest.raises(XForgeError):
+    with pytest.raises(BakerError):
         BasicStep(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",
@@ -72,7 +72,7 @@ def test_fails_with_circular_inputs():
         def script(self):
             pass
 
-    with pytest.raises(XForgeError):
+    with pytest.raises(BakerError):
         BasicStep(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",

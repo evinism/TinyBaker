@@ -5,15 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-xforge = {editable = true, path = "."}
+littlebaker = {editable = true, path = "."}
 black = "*"
 flake8 = "*"
 fs = "*"
 
 [packages]
-
-[requires]
-python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
