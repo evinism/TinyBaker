@@ -1,10 +1,10 @@
-# littlebaker: Lightweight file-to-file build tool built for production workloads
+# tinybaker: Lightweight file-to-file build tool built for production workloads
 
 This is a "working" example of a script that builds an ml model from given train and test dataframes.
 
 ```py
 # train_step.py
-from littlebaker import StepDefinition
+from tinybaker import StepDefinition
 import pandas as pd
 from some_cool_ml_library import train_model, test_model
 

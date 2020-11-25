@@ -1,6 +1,6 @@
 import pytest
-from littlebaker import StepDefinition
-from littlebaker.exceptions import FileSetError, BakerError
+from tinybaker import StepDefinition
+from tinybaker.exceptions import FileSetError, BakerError
 
 
 def test_validate_paths():

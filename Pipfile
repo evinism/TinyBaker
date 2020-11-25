@@ -5,10 +5,11 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-littlebaker = {editable = true, path = "."}
+tinybaker = {editable = true, path = "."}
 black = "*"
 flake8 = "*"
 fs = "*"
+twine = "*"
 
 [packages]
 
