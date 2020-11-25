@@ -8,6 +8,7 @@ pytest = "*"
 xforge = {editable = true, path = "."}
 black = "*"
 flake8 = "*"
+fs = "*"
 
 [packages]
 

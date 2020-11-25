@@ -80,3 +80,35 @@ def test_fails_with_circular_inputs():
             },
             output_paths={"baz": "./tests/__data__/foo.txt"},
         ).build()
+
+
+def test_in_memory_sequence():
+    class StepOne(StepDefinition):
+        input_file_set = {"foo"}
+        output_file_set = {"bar"}
+
+        def script(self):
+            with self.input_files["foo"].open() as f:
+                data = f.read()
+            with self.output_files["bar"].open() as f:
+                f.write(data)
+
+    class StepTwo(StepDefinition):
+        input_file_set = {"bar"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            with self.input_files["bar"].open() as f:
+                data = f.read()
+            with self.output_files["baz"].open() as f:
+                f.write(data)
+
+    bar_path = "/tmp/lolol"
+    StepOne(
+        input_paths={"foo": "./tests/__data__/foo.txt"}, output_paths={"bar": bar_path}
+    ).build(overwrite=True)
+    StepTwo(input_paths={"bar": bar_path}, output_paths={"baz": "/tmp/baz"}).build(
+        overwrite=True
+    )
+    with open("/tmp/baz", "r") as f:
+        assert f.read() == "foo contents"

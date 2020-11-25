@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 
 setup(
-    name="xforge", # Replace with your own username
+    name="xforge",
     version="0.0.1",
     author="Evin Sellin",
     author_email="evinism@gmail.com",
@@ -15,6 +15,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/pypa/xforge",
     packages=find_packages(),
+    install_requires=['fs'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
