@@ -1,3 +1,4 @@
+from fs import open_fs
 from typing import Dict, Set
 from abc import ABC, abstractmethod
 from .fileref import FileRef
@@ -5,11 +6,12 @@ from .exceptions import FileSetError, CircularFileSetError, BakerError
 
 PathDict = Dict[str, str]
 FileDict = Dict[str, FileRef]
+TagSet = Set[str]
 
 
 class StepDefinition(ABC):
-    input_file_set = set()
-    output_file_set = set()
+    input_file_set: TagSet = set()
+    output_file_set: TagSet = set()
 
     def __init__(self, input_paths: PathDict, output_paths: PathDict, config=None):
         self.input_files: FileDict = {}
@@ -29,7 +31,7 @@ class StepDefinition(ABC):
         intersection = set.intersection(input_path_set, output_path_set)
         if len(intersection):
             raise CircularFileSetError(
-                "File included as both input and output: ".format(
+                "File included as both input and output: {}".format(
                     ", ".join(intersection)
                 )
             )
@@ -44,7 +46,7 @@ class StepDefinition(ABC):
                 output_paths[f], read_bit=False, write_bit=True
             )
 
-    def build(self, overwrite=False):
+    def build(self, overwrite=True):
         for tag in self.input_files:
             file_ref = self.input_files[tag]
             if not file_ref.exists():
