@@ -4,9 +4,14 @@ from typing import Set
 class BakerError(Exception):
     pass
 
+class TagConflictError(Exception):
+    pass
 
 class FileSetError(BakerError):
     def __init__(self, actual: Set[str], expected: Set[str]):
+
+        import pdb
+        pdb.set_trace()
         messages = []
         if len(actual - expected) > 0:
             messages.append(
@@ -14,7 +19,7 @@ class FileSetError(BakerError):
             )
         if len(expected - actual) > 0:
             messages.append(
-                "Missing files: {}".format(", ".join(list(actual - expected)))
+                "Missing files: {}".format(", ".join(list(expected - actual)))
             )
         super().__init__("; ".join(messages))
 
