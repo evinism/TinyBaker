@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Set
 from uuid import uuid4
 import os
 from ..step_definition import StepDefinition
 from ..exceptions import BakerError, TagConflictError
 
 
-def sequence(seq_steps: List[StepDefinition]):
+def sequence(seq_steps: List[StepDefinition], exposed_intermediates: Set[str] = set()):
     # Perform validation that the sequence makes sense.
     if len(seq_steps) < 1:
         raise BakerError("Cannot sequence fewer than 1 event")
@@ -27,6 +27,15 @@ def sequence(seq_steps: List[StepDefinition]):
                     ", ".join(items)
                 )
             )
+        # Handle exposed intermediates for this particular item
+        # TODO: Handle the issue where multiple steps may expose
+        # this intermediate, probably by moving up in the chain
+        intermediates_to_expose = set.intersection(
+            first.output_file_set, exposed_intermediates
+        )
+        if len(intermediates_to_expose) > 0:
+            additional_outputs = additional_outputs.union(intermediates_to_expose)
+
         additional_outputs = additional_outputs.union(unconsumed_outputs)
 
         # Additional Inputs
@@ -51,8 +60,11 @@ def sequence(seq_steps: List[StepDefinition]):
         steps = seq_steps
 
         def _generate_temp_filename(self, sid):
-            os.mkdir("/tmp/tinybaker-{}".format(sid))
-            return "/tmp/tinybaker-{}/{}".format(sid, uuid4())
+            # TODO: This really should be in step_definition
+            folder = "/tmp/tinybaker-{}".format(sid)
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+            return "{}/{}".format(folder, uuid4())
 
         def script(self):
             sequence_instance_id = uuid4()

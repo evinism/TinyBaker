@@ -48,7 +48,7 @@ def test_sequence():
         assert f.read() == "foo contents processed bleep contents"
 
 
-def test_sequence():
+def test_complicated_dep_path():
     class StepOne(StepDefinition):
         input_file_set = {"foo"}
         output_file_set = {"bar"}
@@ -73,3 +73,38 @@ def test_sequence():
     Seq = sequence([StepOne, StepTwo, StepThree])
     assert Seq.input_file_set == {"foo", "bingo", "bongo"}
     assert Seq.output_file_set == {"bop"}
+
+
+def test_exposed_intermediates():
+    class StepOne(StepDefinition):
+        input_file_set = {"foo"}
+        output_file_set = {"bar"}
+
+        def script(self):
+            pass
+
+    class StepTwo(StepDefinition):
+        input_file_set = {"bar"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            pass
+
+    class StepThree(StepDefinition):
+        input_file_set = {"baz"}
+        output_file_set = {"bop"}
+
+        def script(self):
+            pass
+
+    class StepFour(StepDefinition):
+        input_file_set = {"bop"}
+        output_file_set = {"bip"}
+
+        def script(self):
+            pass
+
+    Seq = sequence(
+        [StepOne, StepTwo, StepThree, StepFour], exposed_intermediates={"bar", "baz"}
+    )
+    assert Seq.output_file_set == {"bip", "bar", "baz"}
