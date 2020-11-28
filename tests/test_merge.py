@@ -25,10 +25,12 @@ def test_merge():
     Merged = merge([StepOne, StepTwo])
 
     Merged(
-        input_paths={"foo": "./tests/__data__/foo.txt", "bloop": "./tests/__data__/bloop.txt"},
-        output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep" }).build(
-        overwrite=True
-    )
+        input_paths={
+            "foo": "./tests/__data__/foo.txt",
+            "bloop": "./tests/__data__/bloop.txt",
+        },
+        output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
+    ).build(overwrite=True)
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"

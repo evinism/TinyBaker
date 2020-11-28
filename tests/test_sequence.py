@@ -1,5 +1,6 @@
 from tinybaker import sequence, StepDefinition
 
+
 def test_sequence():
     class StepOne(StepDefinition):
         input_file_set = {"foo"}
@@ -24,9 +25,9 @@ def test_sequence():
     Seq = sequence([StepOne, StepTwo])
 
     Seq(
-        input_paths={"foo": "./tests/__data__/foo.txt"}, output_paths={"baz": "/tmp/baz"}).build(
-        overwrite=True
-    )
+        input_paths={"foo": "./tests/__data__/foo.txt"},
+        output_paths={"baz": "/tmp/baz"},
+    ).build(overwrite=True)
 
     with open("/tmp/baz", "r") as f:
         assert f.read() == "foo contents processed"

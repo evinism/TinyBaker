@@ -4,8 +4,10 @@ from typing import Set
 class BakerError(Exception):
     pass
 
+
 class TagConflictError(Exception):
     pass
+
 
 class FileSetError(BakerError):
     def __init__(self, actual: Set[str], expected: Set[str]):
