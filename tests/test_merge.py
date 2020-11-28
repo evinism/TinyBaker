@@ -5,8 +5,8 @@ import pytest
 
 def test_merge():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo"}
+        output_tags = {"bar"}
 
         def script(self):
             with self.input_files["foo"].open() as f:
@@ -15,8 +15,8 @@ def test_merge():
                 f.write(data + " processed")
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bloop"}
-        output_file_set = {"bleep"}
+        input_tags = {"bloop"}
+        output_tags = {"bleep"}
 
         def script(self):
             with self.input_files["bloop"].open() as f:
@@ -43,15 +43,15 @@ def test_merge():
 
 def test_conflicting_outputs():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar", "beep"}
+        input_tags = {"foo"}
+        output_tags = {"bar", "beep"}
 
         def script(self):
             pass
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bloop"}
-        output_file_set = {"bar", "baz"}
+        input_tags = {"bloop"}
+        output_tags = {"bar", "baz"}
 
         def script(self):
             pass
@@ -62,19 +62,19 @@ def test_conflicting_outputs():
 
 def test_conflicting_inputs():
     class StepOne(StepDefinition):
-        input_file_set = {"foo", "beppo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo", "beppo"}
+        output_tags = {"bar"}
 
         def script(self):
             pass
 
     class StepTwo(StepDefinition):
-        input_file_set = {"foo", "boppo"}
-        output_file_set = {"baz"}
+        input_tags = {"foo", "boppo"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
 
     Merged = merge([StepOne, StepTwo])
-    Merged.input_file_set = {"foo", "boppo", "beppo"}
-    Merged.output_file_set = {"bar", "baz"}
+    Merged.input_tags = {"foo", "boppo", "beppo"}
+    Merged.output_tags = {"bar", "baz"}

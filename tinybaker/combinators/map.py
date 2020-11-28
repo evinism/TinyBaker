@@ -31,29 +31,29 @@ def _invert_mapping(mapping: Dict[str, str]):
 
 
 def map_tags(base_step: StepDefinition, input_mapping={}, output_mapping={}):
-    extra_input_keys = set(input_mapping.values()) - base_step.input_file_set
+    extra_input_keys = set(input_mapping.values()) - base_step.input_tags
     if len(extra_input_keys) > 0:
         msg = "Unexpected key(s) for input mapping: {}".format(
             ", ".join(extra_input_keys)
         )
         raise BakerError(msg)
 
-    extra_output_keys = set(output_mapping) - base_step.output_file_set
+    extra_output_keys = set(output_mapping) - base_step.output_tags
     if len(extra_output_keys) > 0:
         msg = "Unexpected key(s) for output mapping: {}".format(
             ", ".join(extra_output_keys)
         )
         raise BakerError(msg)
 
-    mapping_input_file_set = _map_names(
-        base_step.input_file_set, _invert_mapping(input_mapping)
+    mapping_input_tags = _map_names(
+        base_step.input_tags, _invert_mapping(input_mapping)
     )
-    mapping_output_file_set = _map_names(base_step.output_file_set, output_mapping)
+    mapping_output_tags = _map_names(base_step.output_tags, output_mapping)
 
     class TagMapping(StepDefinition):
-        nonlocal mapping_input_file_set, mapping_output_file_set, base_step, input_mapping, output_mapping
-        input_file_set = mapping_input_file_set
-        output_file_set = mapping_output_file_set
+        nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping
+        input_tags = mapping_input_tags
+        output_tags = mapping_output_tags
 
         _base_step = base_step
         _input_mapping = input_mapping

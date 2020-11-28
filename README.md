@@ -15,8 +15,8 @@ import pandas as pd
 from some_cool_ml_library import train_model, test_model
 
 class TrainModelStep(StepDefinition):
-  input_file_set = {"train_csv", "test_csv"}
-  output_file_set = {"pickled_model"}
+  input_tags = {"train_csv", "test_csv"}
+  output_tags = {"pickled_model"}
 
   def script():
     with self.input_files["train_csv"].open() as f:
