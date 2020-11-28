@@ -1,9 +1,9 @@
 import pytest
-from tinybaker import sequence, StepDefinition
+from tinybaker import sequence, Transform
 
 
 def test_sequence():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
@@ -13,7 +13,7 @@ def test_sequence():
             with self.output_files["bar"].open() as f:
                 f.write(data)
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 
@@ -23,7 +23,7 @@ def test_sequence():
             with self.output_files["baz"].open() as f:
                 f.write(data + " processed")
 
-    class StepThree(StepDefinition):
+    class StepThree(Transform):
         input_tags = {"baz", "bleep"}
         output_tags = {"boppo"}
 
@@ -50,21 +50,21 @@ def test_sequence():
 
 
 def test_complicated_dep_path():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
         def script(self):
             pass
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar", "bongo"}
         output_tags = {"baz"}
 
         def script(self):
             pass
 
-    class StepThree(StepDefinition):
+    class StepThree(Transform):
         input_tags = {"baz", "bingo"}
         output_tags = {"bop"}
 
@@ -77,28 +77,28 @@ def test_complicated_dep_path():
 
 
 def test_exposed_intermediates():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
         def script(self):
             pass
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 
         def script(self):
             pass
 
-    class StepThree(StepDefinition):
+    class StepThree(Transform):
         input_tags = {"baz"}
         output_tags = {"bop"}
 
         def script(self):
             pass
 
-    class StepFour(StepDefinition):
+    class StepFour(Transform):
         input_tags = {"bop"}
         output_tags = {"bip"}
 
@@ -112,21 +112,21 @@ def test_exposed_intermediates():
 
 
 def test_gap_in_output_and_input():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar", "bingo"}
 
         def script(self):
             pass
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 
         def script(self):
             pass
 
-    class StepThree(StepDefinition):
+    class StepThree(Transform):
         input_tags = {"baz", "bingo"}
         output_tags = {"bop"}
 

@@ -1,10 +1,10 @@
 import pytest
-from tinybaker import StepDefinition
+from tinybaker import Transform
 from tinybaker.exceptions import FileSetError, BakerError
 
 
 def test_validate_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -23,7 +23,7 @@ def test_validate_paths():
 
 
 def test_opens_local_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -47,7 +47,7 @@ def test_opens_local_paths():
 
 
 def test_fails_with_missing_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -65,7 +65,7 @@ def test_fails_with_missing_paths():
 
 
 def test_fails_with_circular_inputs():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -83,7 +83,7 @@ def test_fails_with_circular_inputs():
 
 
 def test_in_memory_sequence():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
@@ -93,7 +93,7 @@ def test_in_memory_sequence():
             with self.output_files["bar"].open() as f:
                 f.write(data)
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 

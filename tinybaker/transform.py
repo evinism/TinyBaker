@@ -9,7 +9,7 @@ FileDict = Dict[str, FileRef]
 TagSet = Set[str]
 
 
-class StepDefinition(ABC):
+class Transform(ABC):
     input_tags: TagSet = set()
     output_tags: TagSet = set()
 

@@ -1,6 +1,6 @@
 from typing import Set, Dict
 from ..exceptions import BakerError
-from ..step_definition import StepDefinition, FileRef
+from ..transform import Transform, FileRef
 
 
 def _map_names(name_set: Set[str], mapping: Dict[str, str]):
@@ -30,7 +30,7 @@ def _invert_mapping(mapping: Dict[str, str]):
     return result
 
 
-def map_tags(base_step: StepDefinition, input_mapping={}, output_mapping={}):
+def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
     extra_input_keys = set(input_mapping.values()) - base_step.input_tags
     if len(extra_input_keys) > 0:
         msg = "Unexpected key(s) for input mapping: {}".format(
@@ -50,7 +50,7 @@ def map_tags(base_step: StepDefinition, input_mapping={}, output_mapping={}):
     )
     mapping_output_tags = _map_names(base_step.output_tags, output_mapping)
 
-    class TagMapping(StepDefinition):
+    class TagMapping(Transform):
         nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping
         input_tags = mapping_input_tags
         output_tags = mapping_output_tags

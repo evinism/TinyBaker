@@ -1,7 +1,7 @@
 from typing import List, Set, Dict, NewType, Tuple
 from uuid import uuid4
 import os
-from ..step_definition import StepDefinition
+from ..transform import Transform
 from ..exceptions import BakerError, TagConflictError
 
 
@@ -52,7 +52,7 @@ def _determine_sequence_interface(scope_diagram, exposed_intermediates):
     return [seq_input_tags, seq_output_tags]
 
 
-def sequence(seq_steps: List[StepDefinition], exposed_intermediates: Set[str] = set()):
+def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()):
     # Perform validation that the sequence makes sense.
     if len(seq_steps) < 1:
         raise BakerError("Cannot sequence fewer than 1 event")
@@ -64,7 +64,7 @@ def sequence(seq_steps: List[StepDefinition], exposed_intermediates: Set[str] = 
         scope_diagram, exposed_intermediates
     )
 
-    class Sequence(StepDefinition):
+    class Sequence(Transform):
         nonlocal seq_input_tags, seq_output_tags, seq_steps
         input_tags = seq_input_tags
         output_tags = seq_output_tags
@@ -72,7 +72,7 @@ def sequence(seq_steps: List[StepDefinition], exposed_intermediates: Set[str] = 
         steps = seq_steps
 
         def _generate_temp_filename(self, sid):
-            # TODO: This really should be in step_definition
+            # TODO: This really should be in transform
             folder = "/tmp/tinybaker-{}".format(sid)
             if not os.path.exists(folder):
                 os.mkdir(folder)

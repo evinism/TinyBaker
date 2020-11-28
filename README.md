@@ -10,11 +10,11 @@ For example, consider a transformation from the two files `some/path/train.csv` 
 
 ```py
 # train_step.py
-from tinybaker import StepDefinition
+from tinybaker import Transform
 import pandas as pd
 from some_cool_ml_library import train_model, test_model
 
-class TrainModelStep(StepDefinition):
+class TrainModelStep(Transform):
   input_tags = {"train_csv", "test_csv"}
   output_tags = {"pickled_model"}
 
@@ -56,23 +56,23 @@ This will perform standard error handling, such as raising early if certain file
 Let's say you've got a sequence of steps. We can compose several build steps together using the methods `merge` and `sequence`.
 
 ```
-from tinybaker import StepDefinition, sequence
+from tinybaker import Transform, sequence
 
-class CleanLogs(StepDefinition):
+class CleanLogs(Transform):
   input_files={"raw_logfile"}
   output_files={"cleaned_logfile"}
   ...
 
-class BuildDataframe(StepDefinition):
+class BuildDataframe(Transform):
   input_files={"cleaned_logfile"}
   output_files={"dataframe"}
   ...
 
-class BuildLabels(StepDefinition):
+class BuildLabels(Transform):
   input_files={"cleaned_logfile"}
   output_files={"labels"}
 
-class TrainModelFromDataframe(StepDefinition):
+class TrainModelFromDataframe(Transform):
   input_files={"dataframe", "labels"}
   output_files={"trained_model"}
 

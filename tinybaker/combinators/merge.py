@@ -1,16 +1,16 @@
 from typing import List
-from ..step_definition import StepDefinition
+from ..transform import Transform
 from ..exceptions import BakerError, TagConflictError
 
 
-def merge(merge_steps: List[StepDefinition]):
+def merge(merge_steps: List[Transform]):
     merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
     merge_output_tags = set.union(*[step.output_tags for step in merge_steps])
     if len(merge_output_tags) != sum([len(step.output_tags) for step in merge_steps]):
         # TODO: Tell which outputs are conflicting. But I don't wanna do that yet.
         raise TagConflictError("Output conflicts while merging!")
 
-    class Merged(StepDefinition):
+    class Merged(Transform):
         nonlocal merge_steps, merge_input_tags, merge_output_tags
 
         input_tags = merge_input_tags

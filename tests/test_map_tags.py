@@ -1,8 +1,8 @@
-from tinybaker import map_tags, StepDefinition
+from tinybaker import map_tags, Transform
 
 
 def test_map_tags():
-    class Step(StepDefinition):
+    class Step(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 
@@ -26,7 +26,7 @@ def test_map_tags():
 
 
 def test_map_leaves_unreferenced_files_alone():
-    class Step(StepDefinition):
+    class Step(Transform):
         input_tags = {"bar", "bleep"}
         output_tags = {"baz", "boppo"}
 
