@@ -1,9 +1,8 @@
-from typing import List, Tuple
+from typing import List
 from uuid import uuid4
 import os
-from .step_definition import StepDefinition
-from .exceptions import BakerError, TagConflictError
-from fs.tempfs import TempFS
+from ..step_definition import StepDefinition
+from ..exceptions import BakerError, TagConflictError
 
 def sequence(seq_steps: List[StepDefinition]):
   # Perform validation that the sequence makes sense.

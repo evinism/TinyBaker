@@ -9,9 +9,6 @@ class TagConflictError(Exception):
 
 class FileSetError(BakerError):
     def __init__(self, actual: Set[str], expected: Set[str]):
-
-        import pdb
-        pdb.set_trace()
         messages = []
         if len(actual - expected) > 0:
             messages.append(
