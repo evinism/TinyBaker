@@ -10,8 +10,8 @@ TagSet = Set[str]
 
 
 class StepDefinition(ABC):
-    input_file_set: TagSet = set()
-    output_file_set: TagSet = set()
+    input_tags: TagSet = set()
+    output_tags: TagSet = set()
 
     def __init__(self, input_paths: PathDict, output_paths: PathDict, config=None):
         self.input_files: FileDict = {}
@@ -20,11 +20,11 @@ class StepDefinition(ABC):
         self._init_file_dicts(input_paths, output_paths)
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
-        if set(input_paths) != self.input_file_set:
-            raise FileSetError(set(input_paths), self.input_file_set)
+        if set(input_paths) != self.input_tags:
+            raise FileSetError(set(input_paths), self.input_tags)
 
-        if set(output_paths) != self.output_file_set:
-            raise FileSetError(set(output_paths), self.output_file_set)
+        if set(output_paths) != self.output_tags:
+            raise FileSetError(set(output_paths), self.output_tags)
 
         input_path_set = {input_paths[tag] for tag in input_paths}
         output_path_set = {output_paths[tag] for tag in output_paths}

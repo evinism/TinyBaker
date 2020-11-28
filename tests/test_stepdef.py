@@ -5,8 +5,8 @@ from tinybaker.exceptions import FileSetError, BakerError
 
 def test_validate_paths():
     class BasicStep(StepDefinition):
-        input_file_set = {"foo", "bar"}
-        output_file_set = {"baz"}
+        input_tags = {"foo", "bar"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
@@ -24,8 +24,8 @@ def test_validate_paths():
 
 def test_opens_local_paths():
     class BasicStep(StepDefinition):
-        input_file_set = {"foo", "bar"}
-        output_file_set = {"baz"}
+        input_tags = {"foo", "bar"}
+        output_tags = {"baz"}
 
         def script(self):
             with self.input_files["foo"].open() as f:
@@ -48,8 +48,8 @@ def test_opens_local_paths():
 
 def test_fails_with_missing_paths():
     class BasicStep(StepDefinition):
-        input_file_set = {"foo", "bar"}
-        output_file_set = {"baz"}
+        input_tags = {"foo", "bar"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
@@ -66,8 +66,8 @@ def test_fails_with_missing_paths():
 
 def test_fails_with_circular_inputs():
     class BasicStep(StepDefinition):
-        input_file_set = {"foo", "bar"}
-        output_file_set = {"baz"}
+        input_tags = {"foo", "bar"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
@@ -84,8 +84,8 @@ def test_fails_with_circular_inputs():
 
 def test_in_memory_sequence():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo"}
+        output_tags = {"bar"}
 
         def script(self):
             with self.input_files["foo"].open() as f:
@@ -94,8 +94,8 @@ def test_in_memory_sequence():
                 f.write(data)
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bar"}
-        output_file_set = {"baz"}
+        input_tags = {"bar"}
+        output_tags = {"baz"}
 
         def script(self):
             with self.input_files["bar"].open() as f:

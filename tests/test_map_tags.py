@@ -3,8 +3,8 @@ from tinybaker import map_tags, StepDefinition
 
 def test_map_tags():
     class Step(StepDefinition):
-        input_file_set = {"bar"}
-        output_file_set = {"baz"}
+        input_tags = {"bar"}
+        output_tags = {"baz"}
 
         def script(self):
             with self.input_files["bar"].open() as f:
@@ -27,8 +27,8 @@ def test_map_tags():
 
 def test_map_leaves_unreferenced_files_alone():
     class Step(StepDefinition):
-        input_file_set = {"bar", "bleep"}
-        output_file_set = {"baz", "boppo"}
+        input_tags = {"bar", "bleep"}
+        output_tags = {"baz", "boppo"}
 
         def script(self):
             with self.input_files["bar"].open() as f:

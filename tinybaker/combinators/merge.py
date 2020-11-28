@@ -4,19 +4,17 @@ from ..exceptions import BakerError, TagConflictError
 
 
 def merge(merge_steps: List[StepDefinition]):
-    merge_input_file_set = set.union(*[step.input_file_set for step in merge_steps])
-    merge_output_file_set = set.union(*[step.output_file_set for step in merge_steps])
-    if len(merge_output_file_set) != sum(
-        [len(step.output_file_set) for step in merge_steps]
-    ):
+    merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
+    merge_output_tags = set.union(*[step.output_tags for step in merge_steps])
+    if len(merge_output_tags) != sum([len(step.output_tags) for step in merge_steps]):
         # TODO: Tell which outputs are conflicting. But I don't wanna do that yet.
         raise TagConflictError("Output conflicts while merging!")
 
     class Merged(StepDefinition):
-        nonlocal merge_steps, merge_input_file_set, merge_output_file_set
+        nonlocal merge_steps, merge_input_tags, merge_output_tags
 
-        input_file_set = merge_input_file_set
-        output_file_set = merge_output_file_set
+        input_tags = merge_input_tags
+        output_tags = merge_output_tags
 
         steps = merge_steps
 
@@ -34,12 +32,12 @@ def merge(merge_steps: List[StepDefinition]):
                 input_files = {
                     tag: merge_input_paths[tag]
                     for tag in merge_input_paths
-                    if tag in step.input_file_set
+                    if tag in step.input_tags
                 }
                 output_files = {
                     tag: merge_output_paths[tag]
                     for tag in merge_output_paths
-                    if tag in step.output_file_set
+                    if tag in step.output_tags
                 }
                 instances.append(step(input_files, output_files))
 

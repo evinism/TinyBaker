@@ -4,8 +4,8 @@ from tinybaker import sequence, StepDefinition
 
 def test_sequence():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo"}
+        output_tags = {"bar"}
 
         def script(self):
             with self.input_files["foo"].open() as f:
@@ -14,8 +14,8 @@ def test_sequence():
                 f.write(data)
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bar"}
-        output_file_set = {"baz"}
+        input_tags = {"bar"}
+        output_tags = {"baz"}
 
         def script(self):
             with self.input_files["bar"].open() as f:
@@ -24,8 +24,8 @@ def test_sequence():
                 f.write(data + " processed")
 
     class StepThree(StepDefinition):
-        input_file_set = {"baz", "bleep"}
-        output_file_set = {"boppo"}
+        input_tags = {"baz", "bleep"}
+        output_tags = {"boppo"}
 
         def script(self):
             with self.input_files["baz"].open() as f:
@@ -51,56 +51,56 @@ def test_sequence():
 
 def test_complicated_dep_path():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo"}
+        output_tags = {"bar"}
 
         def script(self):
             pass
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bar", "bongo"}
-        output_file_set = {"baz"}
+        input_tags = {"bar", "bongo"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
 
     class StepThree(StepDefinition):
-        input_file_set = {"baz", "bingo"}
-        output_file_set = {"bop"}
+        input_tags = {"baz", "bingo"}
+        output_tags = {"bop"}
 
         def script(self):
             pass
 
     Seq = sequence([StepOne, StepTwo, StepThree])
-    assert Seq.input_file_set == {"foo", "bingo", "bongo"}
-    assert Seq.output_file_set == {"bop"}
+    assert Seq.input_tags == {"foo", "bingo", "bongo"}
+    assert Seq.output_tags == {"bop"}
 
 
 def test_exposed_intermediates():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar"}
+        input_tags = {"foo"}
+        output_tags = {"bar"}
 
         def script(self):
             pass
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bar"}
-        output_file_set = {"baz"}
+        input_tags = {"bar"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
 
     class StepThree(StepDefinition):
-        input_file_set = {"baz"}
-        output_file_set = {"bop"}
+        input_tags = {"baz"}
+        output_tags = {"bop"}
 
         def script(self):
             pass
 
     class StepFour(StepDefinition):
-        input_file_set = {"bop"}
-        output_file_set = {"bip"}
+        input_tags = {"bop"}
+        output_tags = {"bip"}
 
         def script(self):
             pass
@@ -108,31 +108,31 @@ def test_exposed_intermediates():
     Seq = sequence(
         [StepOne, StepTwo, StepThree, StepFour], exposed_intermediates={"bar", "baz"}
     )
-    assert Seq.output_file_set == {"bip", "bar", "baz"}
+    assert Seq.output_tags == {"bip", "bar", "baz"}
 
 
 def test_gap_in_output_and_input():
     class StepOne(StepDefinition):
-        input_file_set = {"foo"}
-        output_file_set = {"bar", "bingo"}
+        input_tags = {"foo"}
+        output_tags = {"bar", "bingo"}
 
         def script(self):
             pass
 
     class StepTwo(StepDefinition):
-        input_file_set = {"bar"}
-        output_file_set = {"baz"}
+        input_tags = {"bar"}
+        output_tags = {"baz"}
 
         def script(self):
             pass
 
     class StepThree(StepDefinition):
-        input_file_set = {"baz", "bingo"}
-        output_file_set = {"bop"}
+        input_tags = {"baz", "bingo"}
+        output_tags = {"bop"}
 
         def script(self):
             pass
 
     Seq = sequence([StepOne, StepTwo, StepThree])
-    assert Seq.input_file_set == {"foo"}
-    assert Seq.output_file_set == {"bop"}
+    assert Seq.input_tags == {"foo"}
+    assert Seq.output_tags == {"bop"}
