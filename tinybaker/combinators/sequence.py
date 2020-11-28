@@ -15,7 +15,7 @@ def sequence(seq_steps: List[StepDefinition]):
     additional_outputs = set()
     additional_inputs = set()
 
-    for i in range(len(seq_steps) - 2):
+    for i in range(len(seq_steps) - 1):
         first = seq_steps[i]
         second = seq_steps[i + 1]
         # Additional Outputs

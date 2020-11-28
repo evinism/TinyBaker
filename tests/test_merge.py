@@ -1,4 +1,6 @@
 from tinybaker import merge, StepDefinition
+from tinybaker.exceptions import TagConflictError
+import pytest
 
 
 def test_merge():
@@ -37,3 +39,42 @@ def test_merge():
 
     with open("/tmp/bleep", "r") as f:
         assert f.read() == "bloop contents processed"
+
+
+def test_conflicting_outputs():
+    class StepOne(StepDefinition):
+        input_file_set = {"foo"}
+        output_file_set = {"bar", "beep"}
+
+        def script(self):
+            pass
+
+    class StepTwo(StepDefinition):
+        input_file_set = {"bloop"}
+        output_file_set = {"bar", "baz"}
+
+        def script(self):
+            pass
+
+    with pytest.raises(TagConflictError):
+        merge([StepOne, StepTwo])
+
+
+def test_conflicting_inputs():
+    class StepOne(StepDefinition):
+        input_file_set = {"foo", "beppo"}
+        output_file_set = {"bar"}
+
+        def script(self):
+            pass
+
+    class StepTwo(StepDefinition):
+        input_file_set = {"foo", "boppo"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            pass
+
+    Merged = merge([StepOne, StepTwo])
+    Merged.input_file_set = {"foo", "boppo", "beppo"}
+    Merged.output_file_set = {"bar", "baz"}
