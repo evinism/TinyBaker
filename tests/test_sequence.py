@@ -1,3 +1,4 @@
+import pytest
 from tinybaker import sequence, StepDefinition
 
 
@@ -108,3 +109,31 @@ def test_exposed_intermediates():
         [StepOne, StepTwo, StepThree, StepFour], exposed_intermediates={"bar", "baz"}
     )
     assert Seq.output_file_set == {"bip", "bar", "baz"}
+
+
+@pytest.mark.skip("Not yet passing")
+def test_gap_in_output_and_input():
+    class StepOne(StepDefinition):
+        input_file_set = {"foo"}
+        output_file_set = {"bar", "bingo"}
+
+        def script(self):
+            pass
+
+    class StepTwo(StepDefinition):
+        input_file_set = {"bar"}
+        output_file_set = {"baz"}
+
+        def script(self):
+            pass
+
+    class StepThree(StepDefinition):
+        input_file_set = {"baz", "bingo"}
+        output_file_set = {"bop"}
+
+        def script(self):
+            pass
+
+    Seq = sequence([StepOne, StepTwo, StepThree])
+    assert Seq.input_file_set == {"foo"}
+    assert Seq.output_file_set == {"bop"}
