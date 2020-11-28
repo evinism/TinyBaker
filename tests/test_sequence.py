@@ -111,7 +111,6 @@ def test_exposed_intermediates():
     assert Seq.output_file_set == {"bip", "bar", "baz"}
 
 
-@pytest.mark.skip("Not yet passing")
 def test_gap_in_output_and_input():
     class StepOne(StepDefinition):
         input_file_set = {"foo"}
