@@ -1,2 +1,2 @@
-from .step_definition import StepDefinition
+from .transform import Transform
 from .combinators import sequence, merge, map_tags

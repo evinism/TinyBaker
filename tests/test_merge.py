@@ -1,10 +1,11 @@
-from tinybaker import merge, StepDefinition
+from tinybaker import merge, Transform
 from tinybaker.exceptions import TagConflictError
 import pytest
+from tests.runtime import runtime
 
 
 def test_merge():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
@@ -14,7 +15,7 @@ def test_merge():
             with self.output_files["bar"].open() as f:
                 f.write(data + " processed")
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bloop"}
         output_tags = {"bleep"}
 
@@ -32,7 +33,7 @@ def test_merge():
             "bloop": "./tests/__data__/bloop.txt",
         },
         output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
-    ).build(overwrite=True)
+    ).build(runtime)
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"
@@ -42,14 +43,14 @@ def test_merge():
 
 
 def test_conflicting_outputs():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar", "beep"}
 
         def script(self):
             pass
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bloop"}
         output_tags = {"bar", "baz"}
 
@@ -61,14 +62,14 @@ def test_conflicting_outputs():
 
 
 def test_conflicting_inputs():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo", "beppo"}
         output_tags = {"bar"}
 
         def script(self):
             pass
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"foo", "boppo"}
         output_tags = {"baz"}
 

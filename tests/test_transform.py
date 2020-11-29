@@ -1,10 +1,11 @@
 import pytest
-from tinybaker import StepDefinition
+from tinybaker import Transform
 from tinybaker.exceptions import FileSetError, BakerError
+from tests.runtime import runtime
 
 
 def test_validate_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -23,7 +24,7 @@ def test_validate_paths():
 
 
 def test_opens_local_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -43,11 +44,11 @@ def test_opens_local_paths():
             "bar": "./tests/__data__/bar.txt",
         },
         output_paths={"baz": "./tests/__data__/baz.txt"},
-    ).build(overwrite=True)
+    ).build(runtime)
 
 
 def test_fails_with_missing_paths():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -61,11 +62,11 @@ def test_fails_with_missing_paths():
                 "faux": "./tests/__data__/bar.txt",
             },
             output_paths={"baz": "./tests/__data__/baz.txt"},
-        ).build()
+        ).build(runtime)
 
 
 def test_fails_with_circular_inputs():
-    class BasicStep(StepDefinition):
+    class BasicStep(Transform):
         input_tags = {"foo", "bar"}
         output_tags = {"baz"}
 
@@ -79,11 +80,11 @@ def test_fails_with_circular_inputs():
                 "bar": "./tests/__data__/bar.txt",
             },
             output_paths={"baz": "./tests/__data__/foo.txt"},
-        ).build()
+        ).build(runtime)
 
 
 def test_in_memory_sequence():
-    class StepOne(StepDefinition):
+    class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
 
@@ -93,7 +94,7 @@ def test_in_memory_sequence():
             with self.output_files["bar"].open() as f:
                 f.write(data)
 
-    class StepTwo(StepDefinition):
+    class StepTwo(Transform):
         input_tags = {"bar"}
         output_tags = {"baz"}
 
@@ -106,9 +107,9 @@ def test_in_memory_sequence():
     bar_path = "/tmp/lolol"
     StepOne(
         input_paths={"foo": "./tests/__data__/foo.txt"}, output_paths={"bar": bar_path}
-    ).build(overwrite=True)
+    ).build(runtime)
     StepTwo(input_paths={"bar": bar_path}, output_paths={"baz": "/tmp/baz"}).build(
-        overwrite=True
+        runtime
     )
     with open("/tmp/baz", "r") as f:
         assert f.read() == "foo contents"
