@@ -1,4 +1,5 @@
 # tinybaker: Lightweight tool for defining composable file-to-file transformations
+![Python Package](https://github.com/evinism/tinybaker/workflows/Python%20package/badge.svg)
 
 ### Warning: tinybaker is still in alpha, and is not yet suitable for production use
 
