@@ -78,7 +78,7 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
                 os.mkdir(folder)
             return "{}/{}".format(folder, uuid4())
 
-        def script(self):
+        def script(self, runtime):
             sequence_instance_id = uuid4()
             instances = []
 
@@ -130,8 +130,6 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
 
             # Phase 2: Run instances
             for instance in instances:
-                # TODO: Figure out how better to handle overwrites.
-                # Right now, this is handled by the parent class.
-                instance.build(overwrite=True)
+                instance.build(runtime)
 
     return Sequence

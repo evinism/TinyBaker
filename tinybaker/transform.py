@@ -1,8 +1,11 @@
 from fs import open_fs
 from typing import Dict, Set
+import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
 from .exceptions import FileSetError, CircularFileSetError, BakerError
+from .runtime import BakerRuntime, DefaultRuntime
+
 
 PathDict = Dict[str, str]
 FileDict = Dict[str, FileRef]
@@ -46,7 +49,8 @@ class Transform(ABC):
                 output_paths[f], read_bit=False, write_bit=True
             )
 
-    def build(self, overwrite=True):
+    def build(self, runtime=DefaultRuntime()):
+        overwrite = runtime.overwrite
         for tag in self.input_files:
             file_ref = self.input_files[tag]
             if not file_ref.exists():
@@ -61,8 +65,14 @@ class Transform(ABC):
                         file_ref.path
                     )
                 )
-        self.script()
+
+        # This very obviously isn't pythonic, but i like the interface anyways.
+        args = inspect.getfullargspec(self.script).args
+        if len(args) > 1:
+            self.script(runtime)
+        else:
+            self.script()
 
     @abstractmethod
-    def script(self):
+    def script(self, runtime=None):
         pass

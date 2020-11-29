@@ -1,5 +1,6 @@
 import pytest
 from tinybaker import sequence, Transform
+from tests.runtime import runtime
 
 
 def test_sequence():
@@ -43,7 +44,7 @@ def test_sequence():
             "bleep": "./tests/__data__/bleep.txt",
         },
         output_paths={"boppo": "/tmp/boppo"},
-    ).build(overwrite=True)
+    ).build(runtime)
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"
