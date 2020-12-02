@@ -78,7 +78,7 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
                 os.mkdir(folder)
             return "{}/{}".format(folder, uuid4())
 
-        def script(self, runtime):
+        def script(self):
             sequence_instance_id = uuid4()
             instances = []
 
@@ -122,7 +122,11 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
                 output_paths.update(output_paths_from_sequence)
 
                 instances.append(
-                    step(input_paths=input_paths, output_paths=output_paths)
+                    step(
+                        input_paths=input_paths,
+                        output_paths=output_paths,
+                        context=self.context,
+                    )
                 )
 
                 # maintain state
@@ -130,6 +134,6 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
 
             # Phase 2: Run instances
             for instance in instances:
-                instance.build(runtime)
+                instance.build()
 
     return Sequence

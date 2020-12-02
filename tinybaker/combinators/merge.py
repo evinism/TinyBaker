@@ -18,7 +18,7 @@ def merge(merge_steps: List[Transform]):
 
         steps = merge_steps
 
-        def script(self, runtime):
+        def script(self):
             merge_input_paths = {
                 tag: self.input_files[tag].path for tag in self.input_files
             }
@@ -39,10 +39,10 @@ def merge(merge_steps: List[Transform]):
                     for tag in merge_output_paths
                     if tag in step.output_tags
                 }
-                instances.append(step(input_files, output_files))
+                instances.append(step(input_files, output_files, context=self.context))
 
             # This should be made parallel
             for instance in instances:
-                instance.build(runtime)
+                instance.build()
 
     return Merged

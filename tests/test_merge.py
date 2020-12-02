@@ -1,7 +1,7 @@
 from tinybaker import merge, Transform
 from tinybaker.exceptions import TagConflictError
 import pytest
-from tests.runtime import runtime
+from tests.context import context
 
 
 def test_merge():
@@ -33,7 +33,8 @@ def test_merge():
             "bloop": "./tests/__data__/bloop.txt",
         },
         output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
-    ).build(runtime)
+        context=context,
+    ).build()
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"

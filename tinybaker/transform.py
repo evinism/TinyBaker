@@ -4,7 +4,7 @@ import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
 from .exceptions import FileSetError, CircularFileSetError, BakerError
-from .runtime import BakerRuntime, DefaultRuntime
+from .context import BakerContext, DefaultContext
 
 
 PathDict = Dict[str, str]
@@ -16,10 +16,15 @@ class Transform(ABC):
     input_tags: TagSet = set()
     output_tags: TagSet = set()
 
-    def __init__(self, input_paths: PathDict, output_paths: PathDict, config=None):
+    def __init__(
+        self,
+        input_paths: PathDict,
+        output_paths: PathDict,
+        context: BakerContext = DefaultContext(),
+    ):
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
-        self.config = config
+        self.context = context
         self._init_file_dicts(input_paths, output_paths)
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
@@ -49,8 +54,8 @@ class Transform(ABC):
                 output_paths[f], read_bit=False, write_bit=True
             )
 
-    def build(self, runtime=DefaultRuntime()):
-        overwrite = runtime.overwrite
+    def build(self):
+        overwrite = self.context.overwrite
         for tag in self.input_files:
             file_ref = self.input_files[tag]
             if not file_ref.exists():
@@ -66,13 +71,8 @@ class Transform(ABC):
                     )
                 )
 
-        # This very obviously isn't pythonic, but i like the interface anyways.
-        args = inspect.getfullargspec(self.script).args
-        if len(args) > 1:
-            self.script(runtime)
-        else:
-            self.script()
+        self.script()
 
     @abstractmethod
-    def script(self, runtime=None):
+    def script(self):
         pass

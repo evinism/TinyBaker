@@ -1,6 +1,6 @@
 import pytest
 from tinybaker import sequence, Transform
-from tests.runtime import runtime
+from tests.context import context
 
 
 def test_sequence():
@@ -44,7 +44,8 @@ def test_sequence():
             "bleep": "./tests/__data__/bleep.txt",
         },
         output_paths={"boppo": "/tmp/boppo"},
-    ).build(runtime)
+        context=context,
+    ).build()
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"

@@ -59,7 +59,7 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
         _input_mapping = input_mapping
         _output_mapping = output_mapping
 
-        def script(self, runtime):
+        def script(self):
             input_paths = _map_filerefs_to_new_paths(
                 self.input_files, self._input_mapping
             )
@@ -67,8 +67,8 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
                 self.output_files, _invert_mapping(self._output_mapping)
             )
 
-            self._base_step(input_paths=input_paths, output_paths=output_paths).build(
-                runtime
-            )
+            self._base_step(
+                input_paths=input_paths, output_paths=output_paths, context=self.context
+            ).build()
 
     return TagMapping
