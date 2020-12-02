@@ -5,7 +5,11 @@ class BakerError(Exception):
     pass
 
 
-class TagConflictError(Exception):
+class TagConflictError(BakerError):
+    pass
+
+
+class SeriousErrorThatYouShouldOpenAnIssueIfYouGet(BakerError):
     pass
 
 

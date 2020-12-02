@@ -69,6 +69,6 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
 
             self._base_step(
                 input_paths=input_paths, output_paths=output_paths, context=self.context
-            ).build()
+            ).exec_internal(self._current_run_info)
 
     return TagMapping

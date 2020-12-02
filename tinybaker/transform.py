@@ -3,7 +3,12 @@ from typing import Dict, Set
 import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
-from .exceptions import FileSetError, CircularFileSetError, BakerError
+from .exceptions import (
+    FileSetError,
+    CircularFileSetError,
+    BakerError,
+    SeriousErrorThatYouShouldOpenAnIssueIfYouGet,
+)
 from .context import BakerContext, DefaultContext
 
 
@@ -22,10 +27,13 @@ class Transform(ABC):
         output_paths: PathDict,
         context: BakerContext = DefaultContext(),
     ):
+        self.input_paths = input_paths
+        self.output_paths = output_paths
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
         self.context = context
         self._init_file_dicts(input_paths, output_paths)
+        self._current_run_info = None
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
         if set(input_paths) != self.input_tags:
@@ -54,7 +62,7 @@ class Transform(ABC):
                 output_paths[f], read_bit=False, write_bit=True
             )
 
-    def build(self):
+    def _validate_file_existence(self):
         overwrite = self.context.overwrite
         for tag in self.input_files:
             file_ref = self.input_files[tag]
@@ -71,6 +79,16 @@ class Transform(ABC):
                     )
                 )
 
+    def build(self):
+        self.context.run_transform(self)
+
+    def exec_internal(self, run_info):
+        self._current_run_info = run_info
+        self._validate_file_existence()
+        if not run_info:
+            raise SeriousErrorThatYouShouldOpenAnIssueIfYouGet(
+                "No current run information, somehow!"
+            )
         self.script()
 
     @abstractmethod
