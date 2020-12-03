@@ -33,9 +33,10 @@ def _affected_files_for_transform(transform):
 
 
 class BakerContext:
-    def __init__(self, overwrite=False):
+    def __init__(self, overwrite=False, fs_for_intermediates="temp"):
         self.overwrite = overwrite
         self.current_runs = []
+        self.fs_for_intermediates = fs_for_intermediates
 
     def _current_affected_files(self):
         retval = set()

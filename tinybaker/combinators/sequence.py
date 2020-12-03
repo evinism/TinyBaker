@@ -60,11 +60,8 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
         steps = seq_steps
 
         def _generate_temp_filename(self, sid):
-            # TODO: This really should be in transform
-            folder = "/tmp/tinybaker-{}".format(sid)
-            if not os.path.exists(folder):
-                os.mkdir(folder)
-            return "{}/{}".format(folder, uuid4())
+            target_fs = self.context.fs_for_intermediates
+            return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
 
         def script(self):
             sequence_instance_id = uuid4()

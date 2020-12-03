@@ -9,7 +9,7 @@ class TagConflictError(BakerError):
     pass
 
 
-class SeriousErrorThatYouShouldOpenAnIssueIfYouGet(BakerError):
+class SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(BakerError):
     pass
 
 

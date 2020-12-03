@@ -7,7 +7,7 @@ from .exceptions import (
     FileSetError,
     CircularFileSetError,
     BakerError,
-    SeriousErrorThatYouShouldOpenAnIssueIfYouGet,
+    SeriousErrorThatYouShouldOpenAnIssueForIfYouGet,
 )
 from .context import BakerContext, DefaultContext
 
@@ -32,7 +32,6 @@ class Transform(ABC):
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
         self.context = context
-        self._init_file_dicts(input_paths, output_paths)
         self._current_run_info = None
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
@@ -54,12 +53,18 @@ class Transform(ABC):
 
         for f in input_paths:
             self.input_files[f] = FileRef(
-                input_paths[f], read_bit=True, write_bit=False
+                input_paths[f],
+                read_bit=True,
+                write_bit=False,
+                run_info=self._current_run_info,
             )
 
         for f in output_paths:
             self.output_files[f] = FileRef(
-                output_paths[f], read_bit=False, write_bit=True
+                output_paths[f],
+                read_bit=False,
+                write_bit=True,
+                run_info=self._current_run_info,
             )
 
     def _validate_file_existence(self):
@@ -84,9 +89,10 @@ class Transform(ABC):
 
     def exec_internal(self, run_info):
         self._current_run_info = run_info
+        self._init_file_dicts(self.input_paths, self.output_paths)
         self._validate_file_existence()
         if not run_info:
-            raise SeriousErrorThatYouShouldOpenAnIssueIfYouGet(
+            raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
                 "No current run information, somehow!"
             )
         self.script()

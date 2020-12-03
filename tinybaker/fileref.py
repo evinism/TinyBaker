@@ -1,39 +1,68 @@
 from fs import open_fs
-import os.path
+from fs.opener.parse import parse_fs_url
+from .exceptions import SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
 
 
-def _protocol_aware_split(path):
-    arr = path.split("://")
-    if len(arr) == 2:
-        protocol, standard_path = arr
-    else:
-        protocol = None
-        standard_path = path
-    directory, fname = os.path.split(standard_path)
-    if protocol:
-        directory = "{}://{}".format(protocol, directory)
-    return directory, fname
+def get_fname(path):
+    items = path.split("/")
+    if not len(items):
+        return ""
+    return items[-1]
+
+
+def get_truncated_path(path, fname):
+    suffix = "/{}".format(fname)
+    if not path.endswith(suffix):
+        raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
+            "Tried to truncate a path that didnt end with said path"
+        )
+    return path[: -len(suffix)]
 
 
 class FileRef:
-    def __init__(self, path, read_bit, write_bit):
+    def __init__(self, path, read_bit, write_bit, run_info):
         self.path = path
         self._read = read_bit
         self._write = write_bit
         self.opened = False
+        self.run_info = run_info
 
     def exists(self):
-        directory, fname = _protocol_aware_split(self.path)
-        with open_fs(directory) as filesystem:
-            return filesystem.exists(fname)
+        filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
+        if filesystem:
+            with filesystem:
+                return filesystem.exists(resource)
+        return previously_opened_filesystem.exists(resource)
 
     def open(self):
         self.opened = True
-        directory, fname = _protocol_aware_split(self.path)
-        with open_fs(directory) as filesystem:
+
+        # TERRIBLE AND UGLY
+        filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
+        if filesystem:
+            with filesystem:
+                mode = ""
+                if self._read:
+                    mode = mode + "r"
+                if self._write:
+                    mode = mode + "w"
+                return filesystem.open(resource, mode)
+        else:
             mode = ""
             if self._read:
                 mode = mode + "r"
             if self._write:
                 mode = mode + "w"
-            return filesystem.open(fname, mode)
+            return previously_opened_filesystem.open(resource, mode)
+
+    def _get_fs_and_path(self):
+        # Annoyingly, relative dirs are not parsed well by parse_fs_url
+        protocol = self.path.split("://")[0]
+        if protocol in self.run_info.open_fses:
+            # So we see if it's got an appropriate url before trying:
+            parsed = parse_fs_url(self.path)
+            return (None, self.run_info.open_fses[protocol], parsed.resource)
+
+        fname = get_fname(self.path)
+        truncated_path = get_truncated_path(self.path, fname)
+        return (open_fs(truncated_path), None, fname)
