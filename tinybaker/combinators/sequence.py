@@ -111,6 +111,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
                         input_paths=input_paths,
                         output_paths=output_paths,
                         context=self.context,
+                        overwrite=self.overwrite,
                     )
                 )
 

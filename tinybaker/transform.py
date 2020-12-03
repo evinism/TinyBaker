@@ -9,7 +9,7 @@ from .exceptions import (
     BakerError,
     SeriousErrorThatYouShouldOpenAnIssueForIfYouGet,
 )
-from .context import BakerContext, DefaultContext
+from .context import BakerContext, get_default_context
 
 
 PathDict = Dict[str, str]
@@ -25,13 +25,15 @@ class Transform(ABC):
         self,
         input_paths: PathDict,
         output_paths: PathDict,
-        context: BakerContext = DefaultContext(),
+        context: BakerContext = get_default_context(),
+        overwrite: bool = False,
     ):
         self.input_paths = input_paths
         self.output_paths = output_paths
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
         self.context = context
+        self.overwrite = overwrite
         self._current_run_info = None
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
@@ -68,7 +70,7 @@ class Transform(ABC):
             )
 
     def _validate_file_existence(self):
-        overwrite = self.context.overwrite
+        overwrite = self.overwrite
         for tag in self.input_files:
             file_ref = self.input_files[tag]
             if not file_ref.exists():

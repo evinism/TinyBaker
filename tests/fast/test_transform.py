@@ -1,7 +1,6 @@
 import pytest
 from tinybaker import Transform
 from tinybaker.exceptions import FileSetError, BakerError
-from tests.context import context
 
 
 def test_validate_paths():
@@ -19,13 +18,13 @@ def test_validate_paths():
 
     with pytest.raises(FileSetError):
         BasicStep(
-            input_paths={}, output_paths={"baz": "baz/path"}, context=context
+            input_paths={}, output_paths={"baz": "baz/path"}, overwrite=True
         ).build()
     with pytest.raises(FileSetError):
         BasicStep(
             input_paths={"foo": "foo/path", "bar": "bar/path"},
             output_paths={},
-            context=context,
+            overwrite=True,
         ).build()
 
 
@@ -50,7 +49,7 @@ def test_opens_local_paths():
             "bar": "./tests/__data__/bar.txt",
         },
         output_paths={"baz": "./tests/__data__/baz.txt"},
-        context=context,
+        overwrite=True,
     ).build()
 
 
@@ -69,7 +68,7 @@ def test_fails_with_missing_paths():
                 "faux": "./tests/__data__/bar.txt",
             },
             output_paths={"baz": "./tests/__data__/baz.txt"},
-            context=context,
+            overwrite=True,
         ).build()
 
 
@@ -88,7 +87,7 @@ def test_fails_with_circular_inputs():
                 "bar": "./tests/__data__/bar.txt",
             },
             output_paths={"baz": "./tests/__data__/foo.txt"},
-            context=context,
+            overwrite=True,
         ).build()
 
 
@@ -117,10 +116,10 @@ def test_in_memory_sequence():
     StepOne(
         input_paths={"foo": "./tests/__data__/foo.txt"},
         output_paths={"bar": bar_path},
-        context=context,
+        overwrite=True,
     ).build()
     StepTwo(
-        input_paths={"bar": bar_path}, output_paths={"baz": "/tmp/baz"}, context=context
+        input_paths={"bar": bar_path}, output_paths={"baz": "/tmp/baz"}, overwrite=True
     ).build()
     with open("/tmp/baz", "r") as f:
         assert f.read() == "foo contents"

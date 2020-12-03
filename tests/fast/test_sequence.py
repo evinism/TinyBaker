@@ -1,6 +1,5 @@
 import pytest
 from tinybaker import sequence, Transform
-from tests.context import context
 from tinybaker.context import BakerContext
 
 
@@ -45,7 +44,7 @@ def test_sequence():
             "bleep": "./tests/__data__/bleep.txt",
         },
         output_paths={"boppo": "/tmp/boppo"},
-        context=context,
+        overwrite=True,
     ).build()
 
     with open("/tmp/boppo", "r") as f:
@@ -53,7 +52,7 @@ def test_sequence():
 
 
 def test_in_memory_intermediates():
-    in_memory_context = BakerContext(fs_for_intermediates="mem", overwrite=True)
+    in_memory_context = BakerContext(fs_for_intermediates="mem")
 
     class StepOne(Transform):
         input_tags = {"foo"}
@@ -96,6 +95,7 @@ def test_in_memory_intermediates():
         },
         output_paths={"boppo": "/tmp/boppo"},
         context=in_memory_context,
+        overwrite=True,
     ).build()
 
     with open("/tmp/boppo", "r") as f:

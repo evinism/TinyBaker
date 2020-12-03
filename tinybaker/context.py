@@ -33,8 +33,7 @@ def _affected_files_for_transform(transform):
 
 
 class BakerContext:
-    def __init__(self, overwrite=False, fs_for_intermediates="temp"):
-        self.overwrite = overwrite
+    def __init__(self, fs_for_intermediates="temp"):
         self.current_runs = []
         self.fs_for_intermediates = fs_for_intermediates
 
@@ -62,5 +61,8 @@ class BakerContext:
         return {}
 
 
-class DefaultContext(BakerContext):
-    pass
+_default_context = BakerContext()
+
+
+def get_default_context():
+    return _default_context

@@ -1,5 +1,4 @@
 from tinybaker import map_tags, Transform
-from tests.context import context
 
 
 def test_map_tags():
@@ -20,7 +19,7 @@ def test_map_tags():
     Mapped(
         input_paths={"foo": "./tests/__data__/foo.txt"},
         output_paths={"bloop": "/tmp/bloop"},
-        context=context,
+        overwrite=True,
     ).build()
 
     with open("/tmp/bloop", "r") as f:
@@ -53,7 +52,7 @@ def test_map_leaves_unreferenced_files_alone():
             "bleep": "./tests/__data__/bleep.txt",
         },
         output_paths={"bloop": "/tmp/bloop", "boppo": "/tmp/boppo"},
-        context=context,
+        overwrite=True,
     ).build()
 
     with open("/tmp/bloop", "r") as f:

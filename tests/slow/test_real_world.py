@@ -3,7 +3,6 @@ from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
 import pandas as pd
-from tests.context import context
 import pickle
 
 # The digits dataset
@@ -108,7 +107,7 @@ def test_real_world():
             "raw_test_images": "./tests/__data__/mnist/optdigits.tes",
         },
         output_paths={"accuracy": "/tmp/accuracy"},
-        context=context,
+        overwrite=True,
     ).build()
 
     with open("/tmp/accuracy", "r") as f:

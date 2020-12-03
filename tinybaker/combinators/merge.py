@@ -39,7 +39,14 @@ def merge(merge_steps: List[Transform]):
                     for tag in merge_output_paths
                     if tag in step.output_tags
                 }
-                instances.append(step(input_files, output_files, context=self.context))
+                instances.append(
+                    step(
+                        input_files,
+                        output_files,
+                        context=self.context,
+                        overwrite=self.overwrite,
+                    )
+                )
 
             # This should be made parallel
             for instance in instances:
