@@ -34,7 +34,7 @@ class FileRef:
                 return filesystem.exists(resource)
         return previously_opened_filesystem.exists(resource)
 
-    def open(self):
+    def _open_helper(self, bin=False):
         self.opened = True
 
         # TERRIBLE AND UGLY
@@ -46,14 +46,25 @@ class FileRef:
                     mode = mode + "r"
                 if self._write:
                     mode = mode + "w"
+                if bin:
+                    return filesystem.openbin(resource, mode)
                 return filesystem.open(resource, mode)
+
         else:
             mode = ""
             if self._read:
                 mode = mode + "r"
             if self._write:
                 mode = mode + "w"
+            if bin:
+                return previously_opened_filesystem.openbin(resource, mode)
             return previously_opened_filesystem.open(resource, mode)
+
+    def open(self):
+        return self._open_helper()
+
+    def openbin(self):
+        return self._open_helper(True)
 
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url

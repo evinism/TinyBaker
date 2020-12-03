@@ -31,7 +31,7 @@ def _invert_mapping(mapping: Dict[str, str]):
 
 
 def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
-    extra_input_keys = set(input_mapping.values()) - base_step.input_tags
+    extra_input_keys = set(input_mapping) - base_step.input_tags
     if len(extra_input_keys) > 0:
         msg = "Unexpected key(s) for input mapping: {}".format(
             ", ".join(extra_input_keys)
@@ -45,9 +45,7 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
         )
         raise BakerError(msg)
 
-    mapping_input_tags = _map_names(
-        base_step.input_tags, _invert_mapping(input_mapping)
-    )
+    mapping_input_tags = _map_names(base_step.input_tags, input_mapping)
     mapping_output_tags = _map_names(base_step.output_tags, output_mapping)
 
     class TagMapping(Transform):
@@ -61,7 +59,7 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
 
         def script(self):
             input_paths = _map_filerefs_to_new_paths(
-                self.input_files, self._input_mapping
+                self.input_files, _invert_mapping(self._input_mapping)
             )
             output_paths = _map_filerefs_to_new_paths(
                 self.output_files, _invert_mapping(self._output_mapping)

@@ -14,7 +14,7 @@ def test_map_tags():
                 f.write(data + " processed")
 
     Mapped = map_tags(
-        Step, input_mapping={"foo": "bar"}, output_mapping={"baz": "bloop"}
+        Step, input_mapping={"bar": "foo"}, output_mapping={"baz": "bloop"}
     )
 
     Mapped(
@@ -44,7 +44,7 @@ def test_map_leaves_unreferenced_files_alone():
                 f.write(data + " processed")
 
     Mapped = map_tags(
-        Step, input_mapping={"foo": "bar"}, output_mapping={"baz": "bloop"}
+        Step, input_mapping={"bar": "foo"}, output_mapping={"baz": "bloop"}
     )
 
     Mapped(

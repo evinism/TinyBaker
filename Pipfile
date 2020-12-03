@@ -12,8 +12,10 @@ fs = "*"
 twine = "*"
 importlib_metadata = "*"
 pytest-watch = "*"
+pandas = "*"
 
 [packages]
+scikit-learn = "*"
 
 [pipenv]
 allow_prereleases = true
