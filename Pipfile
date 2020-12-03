@@ -11,6 +11,7 @@ flake8 = "*"
 fs = "*"
 twine = "*"
 importlib_metadata = "*"
+pytest-watch = "*"
 
 [packages]
 

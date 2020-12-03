@@ -4,17 +4,23 @@ from .exceptions import BakerError
 
 
 class RunInfo:
-    def __init__(self, transform):
+    def __init__(self, transform, parent):
         self.transform = transform
         self.open_fses = {}
+        # UGGGLLYYY
+        self.parent = parent
 
     def __enter__(self):
+        self.parent.current_runs.append(self)
         self.open_fses = {"mem": MemoryFS(), "temp": TempFS()}
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         for prefix in self.open_fses:
             fs = self.open_fses[prefix]
             fs.close()
+        self.parent.current_runs = [
+            run for run in self.parent.current_runs if run != self
+        ]
 
 
 def _affected_files_for_transform(transform):
@@ -38,6 +44,9 @@ class BakerContext:
         return retval
 
     def run_transform(self, transform):
+        print("Starting run!")
+        print("New no. of runs: {}".format(len(self.current_runs) + 1))
+
         file_overlap = set.intersection(
             _affected_files_for_transform(transform), self._current_affected_files()
         )
@@ -47,11 +56,9 @@ class BakerContext:
                     ", ".join(file_overlap)
                 )
             )
-        run_info = RunInfo(transform)
-        self.current_runs.append(run_info)
+        run_info = RunInfo(transform, self)
         with run_info:
             transform.exec_internal(run_info)
-        self.current_runs = [item for item in self.current_runs if item != run_info]
 
     def construct_run_info(self):
         return {}
