@@ -50,6 +50,6 @@ def merge(merge_steps: List[Transform]):
 
             # This should be made parallel
             for instance in instances:
-                instance.exec_internal(self._current_run_info)
+                instance._exec_with_run_info(self._current_run_info)
 
     return Merged

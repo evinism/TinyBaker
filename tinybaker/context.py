@@ -55,7 +55,7 @@ class BakerContext:
             )
         run_info = RunInfo(transform, self)
         with run_info:
-            transform.exec_internal(run_info)
+            transform._exec_with_run_info(run_info)
 
     def construct_run_info(self):
         return {}

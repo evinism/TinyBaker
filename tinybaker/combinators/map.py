@@ -70,6 +70,6 @@ def map_tags(base_step: Transform, input_mapping={}, output_mapping={}):
                 output_paths=output_paths,
                 context=self.context,
                 overwrite=self.overwrite,
-            ).exec_internal(self._current_run_info)
+            )._exec_with_run_info(self._current_run_info)
 
     return TagMapping

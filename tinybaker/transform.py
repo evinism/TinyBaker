@@ -89,7 +89,7 @@ class Transform(ABC):
     def build(self):
         self.context.run_transform(self)
 
-    def exec_internal(self, run_info):
+    def _exec_with_run_info(self, run_info):
         self._current_run_info = run_info
         self._init_file_dicts(self.input_paths, self.output_paths)
         self._validate_file_existence()

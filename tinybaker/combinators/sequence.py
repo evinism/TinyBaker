@@ -120,7 +120,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
 
             # Phase 2: Run instances
             for instance in instances:
-                instance.exec_internal(self._current_run_info)
+                instance._exec_with_run_info(self._current_run_info)
 
     return Sequence
 
