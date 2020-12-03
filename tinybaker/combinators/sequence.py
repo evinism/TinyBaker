@@ -52,31 +52,16 @@ def _determine_sequence_interface(scope_diagram, exposed_intermediates):
     return [seq_input_tags, seq_output_tags]
 
 
-def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()):
-    # Perform validation that the sequence makes sense.
-    if len(seq_steps) < 1:
-        raise BakerError("Cannot sequence fewer than 1 event")
-    if len(seq_steps) == 1:
-        return seq_steps[0]
-
-    scope_diagram = _build_scope_diagram(seq_steps)
-    seq_input_tags, seq_output_tags = _determine_sequence_interface(
-        scope_diagram, exposed_intermediates
-    )
-
+def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
     class Sequence(Transform):
         nonlocal seq_input_tags, seq_output_tags, seq_steps
         input_tags = seq_input_tags
         output_tags = seq_output_tags
-
         steps = seq_steps
 
         def _generate_temp_filename(self, sid):
-            # TODO: This really should be in transform
-            folder = "/tmp/tinybaker-{}".format(sid)
-            if not os.path.exists(folder):
-                os.mkdir(folder)
-            return "{}/{}".format(folder, uuid4())
+            target_fs = self.context.fs_for_intermediates
+            return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
 
         def script(self):
             sequence_instance_id = uuid4()
@@ -134,6 +119,20 @@ def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()
 
             # Phase 2: Run instances
             for instance in instances:
-                instance.build()
+                instance.exec_internal(self._current_run_info)
 
     return Sequence
+
+
+def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()):
+    # Perform validation that the sequence makes sense.
+    if len(seq_steps) < 1:
+        raise BakerError("Cannot sequence fewer than 1 event")
+    if len(seq_steps) == 1:
+        return seq_steps[0]
+
+    scope_diagram = _build_scope_diagram(seq_steps)
+    seq_input_tags, seq_output_tags = _determine_sequence_interface(
+        scope_diagram, exposed_intermediates
+    )
+    return _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps)

@@ -18,13 +18,15 @@ def test_validate_paths():
     )
 
     with pytest.raises(FileSetError):
-        BasicStep(input_paths={}, output_paths={"baz": "baz/path"}, context=context)
+        BasicStep(
+            input_paths={}, output_paths={"baz": "baz/path"}, context=context
+        ).build()
     with pytest.raises(FileSetError):
         BasicStep(
             input_paths={"foo": "foo/path", "bar": "bar/path"},
             output_paths={},
             context=context,
-        )
+        ).build()
 
 
 def test_opens_local_paths():
