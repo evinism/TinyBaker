@@ -1,6 +1,7 @@
 import pytest
 from tinybaker import sequence, Transform
 from tests.context import context
+from tinybaker.context import BakerContext
 
 
 def test_sequence():
@@ -45,6 +46,56 @@ def test_sequence():
         },
         output_paths={"boppo": "/tmp/boppo"},
         context=context,
+    ).build()
+
+    with open("/tmp/boppo", "r") as f:
+        assert f.read() == "foo contents processed bleep contents"
+
+
+def test_in_memory_intermediates():
+    in_memory_context = BakerContext(fs_for_intermediates="mem", overwrite=True)
+
+    class StepOne(Transform):
+        input_tags = {"foo"}
+        output_tags = {"bar"}
+
+        def script(self):
+            with self.input_files["foo"].open() as f:
+                data = f.read()
+            with self.output_files["bar"].open() as f:
+                f.write(data)
+
+    class StepTwo(Transform):
+        input_tags = {"bar"}
+        output_tags = {"baz"}
+
+        def script(self):
+            with self.input_files["bar"].open() as f:
+                data = f.read()
+            with self.output_files["baz"].open() as f:
+                f.write(data + " processed")
+
+    class StepThree(Transform):
+        input_tags = {"baz", "bleep"}
+        output_tags = {"boppo"}
+
+        def script(self):
+            with self.input_files["baz"].open() as f:
+                data = f.read()
+            with self.input_files["bleep"].open() as f:
+                data2 = f.read()
+            with self.output_files["boppo"].open() as f:
+                f.write(data + " " + data2)
+
+    Seq = sequence([StepOne, StepTwo, StepThree])
+
+    Seq(
+        input_paths={
+            "foo": "./tests/__data__/foo.txt",
+            "bleep": "./tests/__data__/bleep.txt",
+        },
+        output_paths={"boppo": "/tmp/boppo"},
+        context=in_memory_context,
     ).build()
 
     with open("/tmp/boppo", "r") as f:

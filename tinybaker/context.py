@@ -45,9 +45,6 @@ class BakerContext:
         return retval
 
     def run_transform(self, transform):
-        print("Starting run!")
-        print("New no. of runs: {}".format(len(self.current_runs) + 1))
-
         file_overlap = set.intersection(
             _affected_files_for_transform(transform), self._current_affected_files()
         )
