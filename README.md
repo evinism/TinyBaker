@@ -5,19 +5,117 @@
 
 Installation with pip, e.g. `pip install tinybaker`
 
-tinybaker allows programmers to define file-to-file transformations in a simple, concise format, and compose them together with clarity. 
+TinyBaker allows programmers to define file-to-file transformations in a concise format and compose them together with clarity. 
 
 ![Python Package](https://github.com/evinism/tinybaker/blob/main/misc/logo.png)
 
-## Anatomy of a single step
+## The model
 
-Let's say we wanted to define a transformation from one set of files to another. Tinybaker allows a developer to specify a set of input file "tags" that are specified independently from the transformation declaration.
+The main component of TinyBaker is a `Transform`: a standalone mapping from one set of files to another.
+
+```
+                 ___________
+---[ file1 ]--->|           |
+                |           |->--[ file4 ]---
+---[ file2 ]--->| Transform |
+                |           |->--[ file5 ]---
+---[ file3 ]--->|___________|
+```
+
+For example, let's say we were running predictions over a certain ML model. This might look like this:
+```
+                  ___________
+---[ config ]--->|           |
+                 |           |->--[ predictions ]---
+---[ model ]---->|  Predict  |
+                 |           |->--[ performance ]---
+---[ data ]----->|___________|
+```
+
+TinyBaker calls the labels associated which each input / output file a `tag`.
+```
+                  ___________
+---[ config ]--->|           |
+      ^ Tag      |           |->--[ predictions ]---
+---[ model ]---->|  Predict  |       ^ Tag
+      ^ Tag      |           |->--[ performance ]---
+---[ data ]----->|___________|       ^ Tag
+      ^ Tag
+```
+
+We might want where we store input/output files to be configurable, and come from different filesystems. TinyBaker allows you to define the transform while paying attention to only the tags, and not where the file is or what filesystem it's on.
+
+
+```
+                                       ___________
+ftp://path/to/config >--[ config ]--->|           |
+                                      |           |->--[ predictions ]---> ./output.pkl
+/path/to/model.pkl >----[ model ]---->|  Predict  |
+                                      |           |->--[ performance ]---> ./performance.pkl
+/path/to/data.pkl >-----[ data ]----->|___________|
+```
+
+We can imagine a situation where we have file transformations that could theoretically compose:
+```
+                   ________________
+                  |                |
+---[ raw_logs ]-->| BuildDataFrame |->--[ df ]---
+                  |________________|
+                  
+             ____________
+            |            |
+---[ df ]-->| BuildModel |->--[ model ]---
+            |____________|
+```
+
+TinyBaker allows you to compose these two transformations together:
+
+```
+                   ___________________________
+                  |                           |
+---[ raw_logs ]-->| BuildDataFrame+BuildModel |->--[ model ]---
+                  |___________________________|
+```
+
+We now only need to specify the location of 2 files-- TinyBaker handles linking the two steps together
+
+```
+                                 ___________________________
+                                |                           |
+/raw/logs.txt ---[ raw_logs ]-->| BuildDataFrame+BuildModel |->--[ model ]--- /path/to/model.pkl
+                                |___________________________|
+```
+
+Extra deps are propagated to the top level, ensuring you'll never miss one in step 5 of 17, e.g.
+
+```
+                   ________________
+                  |                |
+---[ raw_logs ]-->| BuildDataFrame |->--[ df ]---
+                  |________________|
+                  
+                 ____________
+---[ df ]------>|            |
+                | BuildModel |->--[ model ]---
+---[ config ]-->|____________|
+            
+# Goes to...
+
+                   ___________________________
+---[ raw_logs ]-->|                           |
+                  | BuildDataFrame+BuildModel |->--[ model ]---
+---[ config ]---->|___________________________|
+```
+
+### In-Code Anatomy of a single transform
+
+The following describes a minimal transform one can define in TinyBaker
 
 ```py
 from tinybaker import Transform
 
 class SampleTransform(Transform):
-  # 1 tag per input file for this transformation
+  # 1 tag per input file
   input_tags = {"first_input", "second_input"}
   output_tags = {"some_output"}
 
@@ -47,7 +145,7 @@ SampleTransform(
 
 ```
 
-### Real-world example
+### Real-world example of a single transform
 
 For a real-world example, consider training an ML model. This is a transformation from the two files `some/path/train.csv` and `some/path/test.csv` to a pickled ML model `another/path/some_model.pkl` and statistics. With `tinybaker`, you can specify this individual configurable step as follows:
 
@@ -115,7 +213,7 @@ This makes testing of steps very easy: test suites can operate off of local data
 
 ## Combining several build steps
 
-Let's say you've got a sequence of steps. We can compose several build steps together using the methods `merge` and `sequence`.
+We can compose several build steps together using the methods `merge` and `sequence`.
 
 ```
 from tinybaker import Transform, sequence
@@ -214,4 +312,4 @@ Concat(
 
 ## Contributing
 
-Please contribute!
+Please contribute! I appreciate any and all help!
