@@ -108,7 +108,7 @@ TrainModelStep(
 This will perform standard error handling, such as raising early if certain files are missing.
 
 ### Operating over multiple filesystems
-Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use (any filesystem that pyfilesystem2 supports)[https://www.pyfilesystem.org/page/index-of-filesystems/]. For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
+Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
 
 This makes testing of steps very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
 
