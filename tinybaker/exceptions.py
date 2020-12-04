@@ -5,6 +5,10 @@ class BakerError(Exception):
     pass
 
 
+class BakerUnsupportedError(Exception):
+    pass
+
+
 class TagConflictError(BakerError):
     pass
 

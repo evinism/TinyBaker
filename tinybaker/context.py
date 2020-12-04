@@ -1,6 +1,8 @@
 from fs.memoryfs import MemoryFS
 from fs.tempfs import TempFS
 from .exceptions import BakerError
+from .workarounds.annot import is_fileset
+from .util import affected_files_for_transform
 
 
 class RunInfo:
@@ -23,15 +25,6 @@ class RunInfo:
         ]
 
 
-def _affected_files_for_transform(transform):
-    retval = set()
-    for tag in transform.input_paths:
-        retval.add(transform.input_paths[tag])
-    for tag in transform.output_paths:
-        retval.add(transform.output_paths[tag])
-    return retval
-
-
 class BakerContext:
     def __init__(self, fs_for_intermediates="temp"):
         self.current_runs = []
@@ -40,12 +33,12 @@ class BakerContext:
     def _current_affected_files(self):
         retval = set()
         for run in self.current_runs:
-            retval = retval.union(_affected_files_for_transform(run.transform))
+            retval = retval.union(affected_files_for_transform(run.transform))
         return retval
 
     def run_transform(self, transform):
         file_overlap = set.intersection(
-            _affected_files_for_transform(transform), self._current_affected_files()
+            affected_files_for_transform(transform), self._current_affected_files()
         )
         if len(file_overlap):
             raise BakerError(
