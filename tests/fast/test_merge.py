@@ -33,7 +33,7 @@ def test_merge():
         },
         output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"

@@ -19,13 +19,13 @@ def test_validate_paths():
     with pytest.raises(FileSetError):
         BasicStep(
             input_paths={}, output_paths={"baz": "baz/path"}, overwrite=True
-        ).build()
+        ).run()
     with pytest.raises(FileSetError):
         BasicStep(
             input_paths={"foo": "foo/path", "bar": "bar/path"},
             output_paths={},
             overwrite=True,
-        ).build()
+        ).run()
 
 
 def test_opens_local_paths():
@@ -50,7 +50,7 @@ def test_opens_local_paths():
         },
         output_paths={"baz": "./tests/__data__/baz.txt"},
         overwrite=True,
-    ).build()
+    ).run()
 
 
 def test_fails_with_missing_paths():
@@ -69,7 +69,7 @@ def test_fails_with_missing_paths():
             },
             output_paths={"baz": "./tests/__data__/baz.txt"},
             overwrite=True,
-        ).build()
+        ).run()
 
 
 def test_fails_with_circular_inputs():
@@ -88,7 +88,7 @@ def test_fails_with_circular_inputs():
             },
             output_paths={"baz": "./tests/__data__/foo.txt"},
             overwrite=True,
-        ).build()
+        ).run()
 
 
 def test_in_memory_sequence():
@@ -117,9 +117,9 @@ def test_in_memory_sequence():
         input_paths={"foo": "./tests/__data__/foo.txt"},
         output_paths={"bar": bar_path},
         overwrite=True,
-    ).build()
+    ).run()
     StepTwo(
         input_paths={"bar": bar_path}, output_paths={"baz": "/tmp/baz"}, overwrite=True
-    ).build()
+    ).run()
     with open("/tmp/baz", "r") as f:
         assert f.read() == "foo contents"

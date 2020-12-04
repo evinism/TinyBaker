@@ -20,7 +20,7 @@ def test_map_tags():
         input_paths={"foo": "./tests/__data__/foo.txt"},
         output_paths={"bloop": "/tmp/bloop"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/bloop", "r") as f:
         assert f.read() == "foo contents processed"
@@ -53,7 +53,7 @@ def test_map_leaves_unreferenced_files_alone():
         },
         output_paths={"bloop": "/tmp/bloop", "boppo": "/tmp/boppo"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/bloop", "r") as f:
         assert f.read() == "foo contents processed"

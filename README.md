@@ -42,7 +42,7 @@ This would then be executed via:
 SampleTransform(
   input_paths={"first_input": "path/to/input1", "second_input"= "path/to/input2"}
   output_paths={"some_output": "path/to/write/output"}
-).build()
+).run()
 
 ```
 
@@ -102,7 +102,7 @@ TrainModelStep(
     "pickled_model": pickled_model_path,
     "results": results_path
   }
-).build()
+).run()
 ```
 
 This will perform standard error handling, such as raising early if certain files are missing.
@@ -149,7 +149,7 @@ task = TrainFromRawLogs(
   output_paths={"trained_model": "/path/to/model.pkl"}
 )
 
-task.build()
+task.run()
 ```
 
 Hooking up inputs and outputs is determined via tag name, e.g. if step 1 outputs tag "foo", and step 2 takes tag "foo" as inputs, they will be automatically hooked together.

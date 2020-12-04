@@ -129,7 +129,7 @@ class Transform(ABC):
             else:
                 ensure_output_doesnt_exist(self.output_files[tag])
 
-    def build(self):
+    def run(self):
         self.context.run_transform(self)
 
     def _exec_with_run_info(self, run_info):

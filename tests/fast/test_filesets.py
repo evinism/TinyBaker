@@ -23,7 +23,7 @@ def test_filesets_work_for_inputs():
         },
         output_paths={"concatted": "/tmp/concatted"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/concatted", "r") as f:
         assert f.read() == "foo contentsbar contents"
@@ -49,7 +49,7 @@ def test_filesets_work_for_outputs():
         },
         output_paths={fileset("copied"): outpaths},
         overwrite=True,
-    ).build()
+    ).run()
 
     for path in outpaths:
         with open(path, "r") as f:
@@ -76,4 +76,4 @@ def test_filesets_dont_work_for_sequences():
             input_paths={"foo": "./tests/__data__/foo.txt"},
             output_paths={"bar": "./tests/__data__/bar.txt"},
             overwrite=True,
-        ).build()
+        ).run()

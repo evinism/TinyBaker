@@ -45,7 +45,7 @@ def test_sequence():
         },
         output_paths={"boppo": "/tmp/boppo"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"
@@ -96,7 +96,7 @@ def test_in_memory_intermediates():
         output_paths={"boppo": "/tmp/boppo"},
         context=in_memory_context,
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"

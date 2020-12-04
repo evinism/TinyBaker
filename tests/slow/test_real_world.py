@@ -108,7 +108,7 @@ def test_real_world():
         },
         output_paths={"accuracy": "/tmp/accuracy"},
         overwrite=True,
-    ).build()
+    ).run()
 
     with open("/tmp/accuracy", "r") as f:
         assert f.read() == "0.9032"
