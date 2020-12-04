@@ -58,9 +58,9 @@ class Transform(ABC):
         # TODO: Clean up this fileset code, like a lot
         for tag in input_paths:
             if is_fileset(tag):
-                refset = set()
+                refset = []
                 for individual_path in input_paths[tag]:
-                    refset.add(
+                    refset.append(
                         FileRef(
                             individual_path,
                             read_bit=True,
@@ -79,16 +79,17 @@ class Transform(ABC):
 
         for tag in output_paths:
             if is_fileset(tag):
-                refset = set()
+                refset = []
                 for individual_path in output_paths[tag]:
-                    FileRef(
-                        individual_path,
-                        read_bit=False,
-                        write_bit=True,
-                        run_info=self._current_run_info,
+                    refset.append(
+                        FileRef(
+                            individual_path,
+                            read_bit=False,
+                            write_bit=True,
+                            run_info=self._current_run_info,
+                        )
                     )
-                    refs
-                self.output_files[f] = refset
+                self.output_files[tag] = refset
             else:
                 self.output_files[tag] = FileRef(
                     output_paths[tag],
