@@ -3,6 +3,7 @@ from typing import Dict, Set
 import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
+from .workarounds.annot import is_fileset
 from .exceptions import (
     FileSetError,
     CircularFileSetError,
@@ -10,6 +11,7 @@ from .exceptions import (
     SeriousErrorThatYouShouldOpenAnIssueForIfYouGet,
 )
 from .context import BakerContext, get_default_context
+from .util import get_files_in_path_dict
 
 
 PathDict = Dict[str, str]
@@ -43,8 +45,8 @@ class Transform(ABC):
         if set(output_paths) != self.output_tags:
             raise FileSetError(set(output_paths), self.output_tags)
 
-        input_path_set = {input_paths[tag] for tag in input_paths}
-        output_path_set = {output_paths[tag] for tag in output_paths}
+        input_path_set = get_files_in_path_dict(input_paths)
+        output_path_set = get_files_in_path_dict(output_paths)
         intersection = set.intersection(input_path_set, output_path_set)
         if len(intersection):
             raise CircularFileSetError(
@@ -53,38 +55,79 @@ class Transform(ABC):
                 )
             )
 
-        for f in input_paths:
-            self.input_files[f] = FileRef(
-                input_paths[f],
-                read_bit=True,
-                write_bit=False,
-                run_info=self._current_run_info,
-            )
+        # TODO: Clean up this fileset code, like a lot
+        for tag in input_paths:
+            if is_fileset(tag):
+                refset = []
+                for individual_path in input_paths[tag]:
+                    refset.append(
+                        FileRef(
+                            individual_path,
+                            read_bit=True,
+                            write_bit=False,
+                            run_info=self._current_run_info,
+                        )
+                    )
+                self.input_files[tag] = refset
+            else:
+                self.input_files[tag] = FileRef(
+                    input_paths[tag],
+                    read_bit=True,
+                    write_bit=False,
+                    run_info=self._current_run_info,
+                )
 
-        for f in output_paths:
-            self.output_files[f] = FileRef(
-                output_paths[f],
-                read_bit=False,
-                write_bit=True,
-                run_info=self._current_run_info,
-            )
+        for tag in output_paths:
+            if is_fileset(tag):
+                refset = []
+                for individual_path in output_paths[tag]:
+                    refset.append(
+                        FileRef(
+                            individual_path,
+                            read_bit=False,
+                            write_bit=True,
+                            run_info=self._current_run_info,
+                        )
+                    )
+                self.output_files[tag] = refset
+            else:
+                self.output_files[tag] = FileRef(
+                    output_paths[tag],
+                    read_bit=False,
+                    write_bit=True,
+                    run_info=self._current_run_info,
+                )
 
     def _validate_file_existence(self):
         overwrite = self.overwrite
-        for tag in self.input_files:
-            file_ref = self.input_files[tag]
+
+        def ensure_input_exists(file_ref):
             if not file_ref.exists():
                 raise BakerError(
                     "Referenced input path {} does not exist!".format(file_ref.path)
                 )
-        for tag in self.output_files:
-            file_ref = self.output_files[tag]
-            if file_ref.exists() and not overwrite:
+
+        for tag in self.input_files:
+            if is_fileset(tag):
+                for path in self.input_files[tag]:
+                    ensure_input_exists(path)
+            else:
+                ensure_input_exists(self.input_files[tag])
+
+        def ensure_output_doesnt_exist(file_ref):
+            if (not overwrite) and file_ref.exists():
                 raise BakerError(
                     "Referenced output path {} already exists, and overwrite is not enabled".format(
                         file_ref.path
                     )
                 )
+
+        for tag in self.output_files:
+            if is_fileset(tag):
+                for path in self.output_files[tag]:
+                    ensure_output_doesnt_exist(path)
+            else:
+                ensure_output_doesnt_exist(self.output_files[tag])
 
     def build(self):
         self.context.run_transform(self)
