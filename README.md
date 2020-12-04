@@ -74,10 +74,10 @@ class TrainModelStep(Transform):
     test_results = test_model(model, test_data)
 
     # Write to output files
-    with self.output_files["results"] as f:
-      results = train_results.formatted_sumarry() + test_results.formatted_summary()
+    with self.output_files["results"].open() as f:
+      results = train_results.formatted_summary() + test_results.formatted_summary()
       f.write(results)
-    with self.output_files["pickled_model"] as f:
+    with self.output_files["pickled_model"].openbin() as f:
       pickle.dump(f, model)
 
 ```
@@ -88,7 +88,11 @@ The script that consumes this may look like:
 # script.py
 from .train_step import TrainModelStep
 
-[_, train_csv_path, test_csv_path, pickled_model_path, results_path] =  parse_args(os)
+train_csv_path = "s3://data/train.csv"
+test_csv_path = "s3://data/test_csv"
+pickled_model_path = "./model.pkl"
+results_path = "./results.txt"
+
 TrainModelStep(
   input_paths={
     "train_csv": train_csv_path,
@@ -102,6 +106,11 @@ TrainModelStep(
 ```
 
 This will perform standard error handling, such as raising early if certain files are missing.
+
+### Operating over multiple filesystems
+Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use (any filesystem that pyfilesystem2 supports)[https://www.pyfilesystem.org/page/index-of-filesystems/]. For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
+
+This makes testing of steps very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
 
 ## Combining several build steps
 
@@ -155,14 +164,28 @@ If you need to expose intermediate files within a sequence, you can use the keyw
 
 `sequence([A, B, C], expose_intermediates={"some_intermediate", "some_other_intermediate"})`
 
-## Renaming
+### Renaming
 
 Right now, since association of files from one step to the next is based on tags, we may end up in a situation where we want to rename tags. If we want to change the tag names, we can use `map_tags` to change them.
 
 ```
+from tinybaker import map_tags
+
 MappedStep = map_tags(
   SomeStep,
   input_mapping={"old_input_name": "new_input_name"},
   output_mapping={"old_output_name": "new_output_name"})
 ```
 
+## Filesets
+### Warning: The Filesets interface will probably be changed at some point in the future!
+
+If a step operates over a dynamic set of files (e.g. logs from n different days), you can use the filesets interface to specify that. Tags that begin with the prefix `fileset::` are interpreted to be filesets rather than just files.
+
+If a sequence includes a fileset as an intermediate, the developer is expected to 
+
+### Example
+
+```
+
+```
