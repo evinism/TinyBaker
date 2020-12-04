@@ -13,6 +13,7 @@ twine = "*"
 importlib_metadata = "*"
 pytest-watch = "*"
 pandas = "*"
+sphinx = "*"
 
 [packages]
 scikit-learn = "*"
