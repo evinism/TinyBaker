@@ -1,7 +1,11 @@
-# tinybaker: Lightweight tool for defining composable file-to-file transformations
+# TinyBaker: Lightweight tool for defining composable file-to-file transformations
 ![Python Package](https://github.com/evinism/tinybaker/workflows/Python%20package/badge.svg)
 
-### Warning: tinybaker is still in beta, and is not yet suitable for production use
+![Python Package](https://github.com/evinism/tinybaker/blob/main/misc/logo.png)
+
+
+*tinybaker is still in beta, and is not yet suitable for production use*
+
 
 Installation with pip, e.g. `pip install tinybaker`
 
