@@ -9,13 +9,12 @@ tinybaker = {editable = true, path = "."}
 black = "*"
 flake8 = "*"
 fs = "*"
+typeguard = "*"
 twine = "*"
 importlib_metadata = "*"
 pytest-watch = "*"
 pandas = "*"
 sphinx = "*"
-
-[packages]
 scikit-learn = "*"
 
 [pipenv]

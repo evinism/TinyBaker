@@ -1,6 +1,11 @@
 import pytest
 from tinybaker import Transform, fileset, sequence
-from tinybaker.exceptions import FileSetError, BakerError, BakerUnsupportedError
+from tinybaker.exceptions import (
+    FileSetError,
+    BakerError,
+    BakerUnsupportedError,
+    ConfigurationError,
+)
 
 
 def test_filesets_work_for_inputs():
@@ -77,3 +82,39 @@ def test_filesets_dont_work_for_sequences():
             output_paths={"bar": "./tests/__data__/bar.txt"},
             overwrite=True,
         ).run()
+
+
+def test_filesets_dont_allow_single_files():
+    class Blah(Transform):
+        input_tags = {fileset("files")}
+        output_tags = {"concatted"}
+
+        def script(self):
+            pass
+
+    with pytest.raises(ConfigurationError):
+        Blah(
+            input_paths={
+                fileset("files"): "/some/path",
+            },
+            output_paths={"concatted": "/tmp/concatted"},
+            overwrite=True,
+        )
+
+
+def test_files_dont_allow_fileset():
+    class Blah(Transform):
+        input_tags = {"single_file"}
+        output_tags = {"concatted"}
+
+        def script(self):
+            pass
+
+    with pytest.raises(ConfigurationError):
+        Blah(
+            input_paths={
+                "single_file": ["/some/path", "/some/other/path"],
+            },
+            output_paths={"concatted": "/tmp/concatted"},
+            overwrite=True,
+        )
