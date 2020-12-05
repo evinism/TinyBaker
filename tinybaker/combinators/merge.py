@@ -1,6 +1,12 @@
 from typing import List
 from ..transform import Transform
 from ..exceptions import BakerError, TagConflictError
+from multiprocessing import Pool
+from ..context import ParallelMode
+
+
+def _exec_standalone(instance, _current_run_info):
+    instance._exec_with_run_info(_current_run_info)
 
 
 def merge(merge_steps: List[Transform]):
@@ -48,8 +54,16 @@ def merge(merge_steps: List[Transform]):
                     )
                 )
 
-            # This should be made parallel
-            for instance in instances:
-                instance._exec_with_run_info(self._current_run_info)
+            if self.context.parallel_mode == ParallelMode.MULTIPROCESSING:
+                # This should be made parallel
+                with Pool(processes=len(instances)) as pool:
+                    args = [
+                        (instance, self._current_run_info) for instance in instances
+                    ]
+
+                    pool.starmap(_exec_standalone, args)
+            else:
+                for instance in instances:
+                    _exec_standalone(instance, self._current_run_info)
 
     return Merged
