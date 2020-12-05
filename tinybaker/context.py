@@ -4,6 +4,7 @@ from .exceptions import BakerError
 from .workarounds.annot import is_fileset
 from .util import affected_files_for_transform
 from enum import Enum
+import warnings
 
 
 class ParallelMode(Enum):
@@ -34,6 +35,10 @@ class BakerContext:
     def __init__(self, fs_for_intermediates="temp", parallel_mode=None):
         self.current_runs = []
         self.fs_for_intermediates = fs_for_intermediates
+        if parallel_mode:
+            warnings.warn(
+                "Parallel mode is barely supported and is highly experimental! Expect errors!"
+            )
         self.parallel_mode = parallel_mode
 
     def _current_affected_files(self):

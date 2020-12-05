@@ -60,7 +60,6 @@ def merge(merge_steps: List[Transform]):
                     args = [
                         (instance, self._current_run_info) for instance in instances
                     ]
-
                     pool.starmap(_exec_standalone, args)
             else:
                 for instance in instances:
