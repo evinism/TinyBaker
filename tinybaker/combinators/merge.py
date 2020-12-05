@@ -1,6 +1,22 @@
 from typing import List
 from ..transform import Transform
 from ..exceptions import BakerError, TagConflictError
+from threading import Thread
+from queue import Queue
+
+
+class MergeWorker(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            instance, run_info = self.queue.get()
+            try:
+                instance._exec_with_run_info(run_info)
+            finally:
+                self.queue.task_done()
 
 
 def merge(merge_steps: List[Transform]):
@@ -48,8 +64,18 @@ def merge(merge_steps: List[Transform]):
                     )
                 )
 
-            # This should be made parallel
-            for instance in instances:
-                instance._exec_with_run_info(self._current_run_info)
+            if self.context.parallel_mode == "multithreading":
+                queue = Queue()
+                for _ in range(min(len(instances), self.context.max_threads)):
+                    worker = MergeWorker(queue)
+                    worker.daemon = True
+                    worker.start()
+
+                for instance in instances:
+                    queue.put((instance, self._current_run_info))
+                queue.join()
+            else:
+                for instance in instances:
+                    instance._exec_with_run_info(self._current_run_info)
 
     return Merged

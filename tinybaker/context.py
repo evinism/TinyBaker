@@ -18,8 +18,12 @@ class RunInfo:
 
 
 class BakerContext:
-    def __init__(self, fs_for_intermediates="temp"):
+    def __init__(
+        self, fs_for_intermediates="temp", max_threads=8, parallel_mode="multithreading"
+    ):
         self.fs_for_intermediates = fs_for_intermediates
+        self.max_threads = max_threads
+        self.parallel_mode = parallel_mode
 
     def run_transform(self, transform):
         run_info = RunInfo()
