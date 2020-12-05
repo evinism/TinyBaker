@@ -3,9 +3,9 @@
 
 *tinybaker is still in beta, and is not yet suitable for production use*
 
-Installation with pip, e.g. `pip install tinybaker`
-
 TinyBaker allows programmers to define file-to-file transformations in a concise format and compose them together with clarity. 
+
+Installation via `pip install tinybaker`
 
 ![Python Package](https://github.com/evinism/tinybaker/blob/main/misc/logo.png)
 
@@ -22,7 +22,7 @@ The main component of TinyBaker is a `Transform`: a standalone mapping from one 
 ---[ file3 ]--->|___________|
 ```
 
-For example, let's say we were running predictions over a certain ML model. This might look like this:
+For example, let's say we were running predictions over a certain ML model. Such a transform might look like this:
 ```
                   ___________
 ---[ config ]--->|           |
@@ -43,8 +43,7 @@ TinyBaker calls the labels associated which each input / output file a `tag`.
       ^ Tag
 ```
 
-We might want where we store input/output files to be configurable, and come from different filesystems. TinyBaker allows you to define the transform while paying attention to only the tags, and not where the file is or what filesystem it's on.
-
+We might want to configure where we store input/output files, or configure files to come from separate filesystems entirely. TinyBaker allows you to define the transform while paying attention to only the tags, even when accessing files across multiple filesystems.
 
 ```
                                        ___________
@@ -86,7 +85,7 @@ We now only need to specify the location of 2 files-- TinyBaker handles linking 
                                 |___________________________|
 ```
 
-Extra deps are propagated to the top level, ensuring you'll never miss one in step 5 of 17, e.g.
+Extra file dependencies are propagated to the top level of a sequence, ensuring you'll never miss a file dependency in step 5 of 17, e.g.
 
 ```
                    ________________
@@ -129,7 +128,7 @@ class SampleTransform(Transform):
       do_something_else_with(f)
 
     # and output or something
-    with self.input_files["some_output"].open() as f:
+    with self.output_files["some_output"].open() as f:
       write_something_to(f)
 
 ```
@@ -204,12 +203,15 @@ TrainModelStep(
 ).run()
 ```
 
-This will perform standard error handling, such as raising early if certain files are missing.
-
 ### Operating over multiple filesystems
 Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
 
 This makes testing of steps very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
+
+### Validation
+
+TinyBaker performs simple validation, such as raising early if input files are missing, or erroring if fully-qualified file paths form a cycle.
+
 
 ## Combining several build steps
 
@@ -251,12 +253,12 @@ task = TrainFromRawLogs(
 task.run()
 ```
 
-Hooking up inputs and outputs is determined via tag name, e.g. if step 1 outputs tag "foo", and step 2 takes tag "foo" as inputs, they will be automatically hooked together.
+Inputs and outputs are hooked up via tag names, e.g. if step 1 outputs tag "foo", and step 2 takes tag "foo" as inputs, TinyBaker will be automatically hook them together.
 
-### Propagation of inputs and outptus
-Let's say task 3 of 4 in a sequence of tasks requires tag "foo", but no previous step generates tag "foo", then this dependency will be propagated to the top level; the sequence as a whole will have a dependency on tag "foo".
+### Propagation of inputs and outputs
+Let's say task 3 of 4 in a sequence of tasks requires tag `foo`, but no previous step generates tag `foo`, then this dependency will be propagated to the top level; the sequence as a whole will have a dependency on tag `foo`.
 
-Additionally, if task 3 of 4 generates a tag "bar", but no further step requires "bar", then the sequence exposes "bar" as an output.
+Additionally, if task 3 of 4 generates a tag `bar`, but no further step requires `bar`, then the sequence exposes "bar" as an output.
 
 ### expose_intermediates
 If you need to expose intermediate files within a sequence, you can use the keywork arg `expose_intermediates` to additionally output the listed intermediate tags, e.g.
@@ -277,11 +279,11 @@ MappedStep = map_tags(
 ```
 
 ## Filesets
-### Warning: The Filesets interface will probably be changed at some point in the future!
+### Warning: The Filesets interface will probably change at some point in the future!
 
 If a step operates over a dynamic set of files (e.g. logs from n different days), you can use the filesets interface to specify that. Tags that begin with the prefix `fileset::` are interpreted to be filesets rather than just files.
 
-If a sequence includes a fileset as an intermediate, the developer is expected to 
+If a sequence includes a fileset as an intermediate, then TinyBaker expects the developer to specify the paths of the intermediate, via `expose_intermediates`. This is a relatively fundamental restriction of the platform, as TinyBaker expects that all paths are specified before script execution.
 
 ### Example
 
@@ -312,4 +314,4 @@ Concat(
 
 ## Contributing
 
-Please contribute! I appreciate any and all help!
+[Please contribute!](contributing.md)
