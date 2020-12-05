@@ -206,7 +206,7 @@ TrainModelStep(
 ### Operating over multiple filesystems
 Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
 
-This makes testing of steps very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
+This makes building test suites for transforms very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
 
 ### Validation
 
@@ -217,26 +217,28 @@ TinyBaker performs simple validation, such as raising early if input files are m
 
 We can compose several build steps together using the methods `merge` and `sequence`.
 
-```
+```py
 from tinybaker import Transform, sequence
 
 class CleanLogs(Transform):
   input_files={"raw_logfile"}
   output_files={"cleaned_logfile"}
-  ...
+  # ...
 
 class BuildDataframe(Transform):
   input_files={"cleaned_logfile"}
   output_files={"dataframe"}
-  ...
+  # ...
 
 class BuildLabels(Transform):
   input_files={"cleaned_logfile"}
   output_files={"labels"}
+  # ...
 
 class TrainModelFromDataframe(Transform):
   input_files={"dataframe", "labels"}
   output_files={"trained_model"}
+  # ...
 
 
 TrainFromRawLogs = sequence(
@@ -263,13 +265,15 @@ Additionally, if task 3 of 4 generates a tag `bar`, but no further step requires
 ### expose_intermediates
 If you need to expose intermediate files within a sequence, you can use the keywork arg `expose_intermediates` to additionally output the listed intermediate tags, e.g.
 
-`sequence([A, B, C], expose_intermediates={"some_intermediate", "some_other_intermediate"})`
+```py
+sequence([A, B, C], expose_intermediates={"some_intermediate", "some_other_intermediate"})
+```
 
-### Renaming
+### Renaming Tags
 
 Right now, since association of files from one step to the next is based on tags, we may end up in a situation where we want to rename tags. If we want to change the tag names, we can use `map_tags` to change them.
 
-```
+```py
 from tinybaker import map_tags
 
 MappedStep = map_tags(
@@ -289,7 +293,7 @@ If a sequence includes a fileset as an intermediate, then TinyBaker expects the 
 
 A concat task can be done as follows:
 
-```
+```py
 class Concat(Transform):
     input_tags = {"fileset::files"}
     output_tags = {"concatted"}
