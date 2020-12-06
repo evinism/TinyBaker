@@ -16,3 +16,12 @@ API reference
 .. autofunction:: map_tags
 
 .. autoclass:: BakerContext
+
+
+:mod:`tinybaker.fileref`
+------------------------
+
+.. module:: tinybaker.fileref
+
+.. autoclass:: FileRef
+    :members:
