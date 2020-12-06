@@ -1,7 +1,7 @@
 # TinyBaker: Lightweight tool for defining composable file-to-file transformations
 ![Python Package](https://github.com/evinism/tinybaker/workflows/Python%20package/badge.svg)
 
-*tinybaker is still in beta*
+*TinyBaker is still in beta. Take care when using it for production workloads.*
 
 TinyBaker allows programmers to define file-to-file transformations in a concise format and compose them together with clarity. 
 
