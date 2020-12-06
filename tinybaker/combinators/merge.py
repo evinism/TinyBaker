@@ -1,8 +1,9 @@
-from typing import List
-from ..transform import Transform
+from typing import List, Iterable
+from ..transform import Transform, TransformMeta
 from ..exceptions import BakerError, TagConflictError
 from threading import Thread
 from queue import Queue
+from typeguard import typechecked
 
 
 class MergeWorker(Thread):
@@ -19,7 +20,9 @@ class MergeWorker(Thread):
                 self.queue.task_done()
 
 
-def merge(merge_steps: List[Transform]):
+@typechecked
+def merge(merge_steps: Iterable[TransformMeta]):
+    merge_steps = list(merge_steps)
     merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
     merge_output_tags = set.union(*[step.output_tags for step in merge_steps])
     if len(merge_output_tags) != sum([len(step.output_tags) for step in merge_steps]):

@@ -1,12 +1,19 @@
-from typing import List, Set, Dict, NewType, Tuple
+from typing import List, Set, Dict, NewType, Tuple, Iterable
 from uuid import uuid4
 import os
-from ..transform import Transform
-from ..exceptions import BakerError, TagConflictError, BakerUnsupportedError
+from ..transform import Transform, TransformMeta
+from ..exceptions import (
+    BakerError,
+    TagConflictError,
+    BakerUnsupportedError,
+    ConfigurationError,
+)
 from ..workarounds.annot import is_fileset
+from typeguard import typechecked
 
 
-def _build_scope_diagram(steps):
+@typechecked
+def _build_scope_diagram(steps: List[TransformMeta]):
     RefCount = NewType("RefCount", int)
     # Origin step index (-1 for external, default)
     SourceIdx = NewType("SourceIdx", int)
@@ -131,7 +138,11 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
     return Sequence
 
 
-def sequence(seq_steps: List[Transform], exposed_intermediates: Set[str] = set()):
+@typechecked
+def sequence(
+    seq_steps: Iterable[TransformMeta], exposed_intermediates: Set[str] = set()
+):
+    seq_steps = list(seq_steps)
     # Perform validation that the sequence makes sense.
     if len(seq_steps) < 1:
         raise BakerError("Cannot sequence fewer than 1 event")

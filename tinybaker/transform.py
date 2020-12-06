@@ -1,5 +1,5 @@
 from fs import open_fs
-from typing import Dict, Set
+from typing import Dict, Set, Union, List, Iterable
 import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
@@ -9,20 +9,38 @@ from .exceptions import (
     CircularFileSetError,
     BakerError,
     SeriousErrorThatYouShouldOpenAnIssueForIfYouGet,
+    ConfigurationError,
 )
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict
+from typeguard import typechecked
 
 
-PathDict = Dict[str, str]
-FileDict = Dict[str, FileRef]
+PathDict = Dict[str, Union[str, Iterable[str]]]
+FileDict = Dict[str, Union[FileRef, List[FileRef]]]
 TagSet = Set[str]
 
 
-class Transform(ABC):
+@typechecked(always=True)
+def _ensure_fileset_iff_fileset_tag(path_dict: PathDict):
+    for tag in path_dict:
+        should_be_string = not is_fileset(tag)
+        value = path_dict[tag]
+        if should_be_string and (type(value) != str):
+            raise ConfigurationError("Tag {} expected file, got fileset".format(tag))
+        if (not should_be_string) and (type(value) == str):
+            raise ConfigurationError("Tag {} expected file, got fileset".format(tag))
+
+
+class TransformMeta(type):
+    pass
+
+
+class Transform(metaclass=TransformMeta):
     input_tags: TagSet = set()
     output_tags: TagSet = set()
 
+    @typechecked
     def __init__(
         self,
         input_paths: PathDict,
@@ -30,8 +48,12 @@ class Transform(ABC):
         context: BakerContext = get_default_context(),
         overwrite: bool = False,
     ):
+        _ensure_fileset_iff_fileset_tag(input_paths)
+        _ensure_fileset_iff_fileset_tag(output_paths)
+
         self.input_paths = input_paths
         self.output_paths = output_paths
+
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
         self.context = context
