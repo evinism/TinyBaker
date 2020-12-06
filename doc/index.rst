@@ -1,6 +1,3 @@
-TinyBaker
-=========
-
 .. mdinclude:: ../README.md
 
 Quick links
