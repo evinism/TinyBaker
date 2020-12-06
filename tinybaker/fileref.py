@@ -20,6 +20,8 @@ def get_truncated_path(path, fname):
 
 
 class FileRef:
+    """Represents a reference to a file. TinyBaker generates these for use in the script() function"""
+
     def __init__(self, path, read_bit, write_bit, run_info):
         self.path = path
         self._read = read_bit
@@ -28,6 +30,7 @@ class FileRef:
         self.run_info = run_info
 
     def exists(self):
+        """Determine whether the file specified by the FileRef exists"""
         filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
         if filesystem:
             with filesystem:
@@ -61,9 +64,11 @@ class FileRef:
             return previously_opened_filesystem.open(resource, mode)
 
     def open(self):
+        """Open the FileRef for use with textual data"""
         return self._open_helper()
 
     def openbin(self):
+        """Open the FileRef for use with binary data"""
         return self._open_helper(True)
 
     def _get_fs_and_path(self):

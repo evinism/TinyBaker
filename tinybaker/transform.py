@@ -37,6 +37,15 @@ class TransformMeta(type):
 
 
 class Transform(metaclass=TransformMeta):
+    """
+    Abstract base class for all transformations in TinyBaker
+
+    :param input_paths: Dictionary of input tags to files.
+    :param output_paths: Dictionary of output tags to files.
+    :param optional context: The BakerContext to use for this transformation
+    :param optional overwrite: Whether or not to configure the transformation to overwrite output files on execution
+    """
+
     input_tags: TagSet = set()
     output_tags: TagSet = set()
 
@@ -152,6 +161,7 @@ class Transform(metaclass=TransformMeta):
                 ensure_output_doesnt_exist(self.output_files[tag])
 
     def run(self):
+        """Run the transform instance"""
         self.context.run_transform(self)
 
     def _exec_with_run_info(self, run_info):
@@ -166,4 +176,7 @@ class Transform(metaclass=TransformMeta):
 
     @abstractmethod
     def script(self):
+        """
+        The script to be run on execution. This is in essence where what the transform actually does is specified
+        """
         pass

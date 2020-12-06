@@ -22,6 +22,12 @@ class MergeWorker(Thread):
 
 @typechecked
 def merge(merge_steps: Iterable[TransformMeta]):
+    """
+    Merge several transformations together. Base transformations must not conflict in output.
+
+    :param merge_steps: Iterable of Transforms to merge together
+    :return: Transform class consisting of a merge between
+    """
     merge_steps = list(merge_steps)
     merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
     merge_output_tags = set.union(*[step.output_tags for step in merge_steps])

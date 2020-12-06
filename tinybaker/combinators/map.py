@@ -34,6 +34,14 @@ def _invert_mapping(mapping: Dict[str, str]):
 
 @typechecked
 def map_tags(base_step: TransformMeta, input_mapping={}, output_mapping={}):
+    """
+    Take a transform and create a new, identical transform with the tags renamed.
+
+    :param base_step: Dictionary of base_step tags to files.
+    :param optional input_mapping: Mapping of old input tag names to new input tag names
+    :param optional output_mapping: Mapping of old output tag names to new input tag names
+    :return: Transform class with renamed inputs / outputs
+    """
     extra_input_keys = set(input_mapping) - base_step.input_tags
     if len(extra_input_keys) > 0:
         msg = "Unexpected key(s) for input mapping: {}".format(

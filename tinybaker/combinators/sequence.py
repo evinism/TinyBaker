@@ -142,6 +142,15 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
 def sequence(
     seq_steps: Iterable[TransformMeta], exposed_intermediates: Set[str] = set()
 ):
+    """
+    Sequence several transforms together, hooking the
+
+    :param seq_steps: An iterable of the transforms to be sequenced.
+    :param exposed_intermediates:
+        Which intermediate tags generated within the sequence to expose
+        to the top-level sequence of transformations
+    :return: Transform class representing a sequence of all the transforms
+    """
     seq_steps = list(seq_steps)
     # Perform validation that the sequence makes sense.
     if len(seq_steps) < 1:

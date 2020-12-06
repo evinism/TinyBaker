@@ -16,6 +16,8 @@ pytest-watch = "*"
 pandas = "*"
 sphinx = "*"
 scikit-learn = "*"
+m2r2 = "*"
+sphinx-autodoc-typehints = "*"
 
 [pipenv]
 allow_prereleases = true
