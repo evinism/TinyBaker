@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="tinybaker",
-    version="0.2.0",
+    version="0.2.1",
     author="Evin Sellin",
     author_email="evinism@gmail.com",
     description="Lightweight file-to-file build tool built for production workloads",
