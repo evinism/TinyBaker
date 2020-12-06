@@ -141,7 +141,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
 @typechecked
 def sequence(
     seq_steps: Iterable[TransformMeta], exposed_intermediates: Set[str] = set()
-):
+) -> TransformMeta:
     """
     Sequence several transforms together, hooking inputs and outputs together via tagname
 

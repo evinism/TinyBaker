@@ -39,6 +39,8 @@ extensions = [
 
 source_suffix = [".rst", ".md"]
 
+html_logo = "_static/logo.png"
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

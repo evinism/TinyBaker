@@ -33,7 +33,11 @@ def _invert_mapping(mapping: Dict[str, str]):
 
 
 @typechecked
-def map_tags(base_step: TransformMeta, input_mapping={}, output_mapping={}):
+def map_tags(
+    base_step: TransformMeta,
+    input_mapping: Dict[str, str] = {},
+    output_mapping: Dict[str, str] = {},
+) -> TransformMeta:
     """
     Take a transform and create a new, identical transform with the tags renamed.
 

@@ -21,7 +21,7 @@ class MergeWorker(Thread):
 
 
 @typechecked
-def merge(merge_steps: Iterable[TransformMeta]):
+def merge(merge_steps: Iterable[TransformMeta]) -> TransformMeta:
     """
     Merge several transformations together. Base transformations must not conflict in output.
 

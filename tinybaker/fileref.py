@@ -1,6 +1,8 @@
+from typing import Union
 from fs import open_fs
 from fs.opener.parse import parse_fs_url
 from .exceptions import SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
+from io import BufferedWriter, BufferedReader, TextIOWrapper
 
 
 def get_fname(path):
@@ -29,8 +31,12 @@ class FileRef:
         self.opened = False
         self.run_info = run_info
 
-    def exists(self):
-        """Determine whether the file specified by the FileRef exists"""
+    def exists(self) -> bool:
+        """
+        Determine whether the file specified by the FileRef exists
+
+        :return: Whether the file exists
+        """
         filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
         if filesystem:
             with filesystem:
@@ -63,12 +69,20 @@ class FileRef:
                 return previously_opened_filesystem.openbin(resource, mode)
             return previously_opened_filesystem.open(resource, mode)
 
-    def open(self):
-        """Open the FileRef for use with textual data"""
+    def open(self) -> TextIOWrapper:
+        """
+        Open the FileRef for use with textual data
+
+        :return: The stream object for interacting with the FileRef
+        """
         return self._open_helper()
 
-    def openbin(self):
-        """Open the FileRef for use with binary data"""
+    def openbin(self) -> Union[BufferedWriter, BufferedReader]:
+        """
+        Open the FileRef for use with binary data
+
+        :return: The stream for interacting with the FileRef
+        """
         return self._open_helper(True)
 
     def _get_fs_and_path(self):
