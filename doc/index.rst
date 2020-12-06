@@ -7,6 +7,7 @@ Quick links
    :maxdepth: 1
 
    api
+   contributing
 
 
 

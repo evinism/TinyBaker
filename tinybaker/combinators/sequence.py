@@ -143,7 +143,7 @@ def sequence(
     seq_steps: Iterable[TransformMeta], exposed_intermediates: Set[str] = set()
 ):
     """
-    Sequence several transforms together, hooking the
+    Sequence several transforms together, hooking inputs and outputs together via tagname
 
     :param seq_steps: An iterable of the transforms to be sequenced.
     :param exposed_intermediates:
