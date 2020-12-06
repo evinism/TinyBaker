@@ -1,4 +1,4 @@
-from .workarounds.annot import is_fileset
+from .workarounds import is_fileset
 
 
 def get_files_in_path_dict(pathdict):

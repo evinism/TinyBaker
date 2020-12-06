@@ -1,7 +1,7 @@
 from fs.memoryfs import MemoryFS
 from fs.tempfs import TempFS
 from .exceptions import BakerError
-from .workarounds.annot import is_fileset
+from .workarounds import is_fileset
 
 
 class RunInfo:

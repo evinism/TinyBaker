@@ -3,7 +3,7 @@ from typing import Dict, Set, Union, List, Iterable
 import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
-from .workarounds.annot import is_fileset
+from .workarounds import is_fileset
 from .exceptions import (
     FileSetError,
     CircularFileSetError,

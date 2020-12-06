@@ -8,7 +8,7 @@ from ..exceptions import (
     BakerUnsupportedError,
     ConfigurationError,
 )
-from ..workarounds.annot import is_fileset
+from ..workarounds import is_fileset
 from typeguard import typechecked
 
 
