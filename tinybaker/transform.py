@@ -12,7 +12,7 @@ from .exceptions import (
     ConfigurationError,
 )
 from .context import BakerContext, get_default_context
-from .util import get_files_in_path_dict
+from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 
 
@@ -48,6 +48,7 @@ class Transform(metaclass=TransformMeta):
 
     input_tags: TagSet = set()
     output_tags: TagSet = set()
+    name = None
 
     @typechecked
     def __init__(
@@ -159,6 +160,11 @@ class Transform(metaclass=TransformMeta):
                     ensure_output_doesnt_exist(path)
             else:
                 ensure_output_doesnt_exist(self.output_files[tag])
+
+    @classproperty
+    def name(cls):
+        """Get the name of the transform."""
+        return cls.__name__
 
     def run(self):
         """Run the transform instance"""

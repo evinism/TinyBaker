@@ -1,6 +1,7 @@
 from typing import List, Iterable
 from ..transform import Transform, TransformMeta
 from ..exceptions import BakerError, TagConflictError
+from ..util import classproperty
 from threading import Thread
 from queue import Queue
 from typeguard import typechecked
@@ -21,12 +22,13 @@ class MergeWorker(Thread):
 
 
 @typechecked
-def merge(merge_steps: Iterable[TransformMeta]) -> TransformMeta:
+def merge(merge_steps: Iterable[TransformMeta], name: str = None) -> TransformMeta:
     """
     Merge several transformations together. Base transformations must not conflict in output.
 
     :param merge_steps: Iterable of Transforms to merge together
-    :return: Transform class consisting of a merge between
+    :param optional name: The name of the resulting transform
+    :return: Transform class consisting of a merge between the input transforms
     """
     merge_steps = list(merge_steps)
     merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
@@ -35,13 +37,22 @@ def merge(merge_steps: Iterable[TransformMeta]) -> TransformMeta:
         # TODO: Tell which outputs are conflicting. But I don't wanna do that yet.
         raise TagConflictError("Output conflicts while merging!")
 
+    merge_name = name
+
     class Merged(Transform):
-        nonlocal merge_steps, merge_input_tags, merge_output_tags
+        nonlocal merge_steps, merge_input_tags, merge_output_tags, merge_name
 
         input_tags = merge_input_tags
         output_tags = merge_output_tags
 
         steps = merge_steps
+        _name = merge_name
+
+        @classproperty
+        def name(cls):
+            if cls._name:
+                return cls._name
+            return "Merge({})".format(",".join([step.name for step in cls.steps]))
 
         def script(self):
             merge_input_paths = {

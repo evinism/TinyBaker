@@ -10,3 +10,11 @@ def get_files_in_path_dict(pathdict):
         else:
             retval.add(pathdict[tag])
     return retval
+
+
+class classproperty(object):
+    def __init__(self, getter):
+        self.getter = getter
+
+    def __get__(self, instance, owner):
+        return self.getter(owner)

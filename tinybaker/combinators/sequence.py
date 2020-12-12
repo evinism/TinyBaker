@@ -8,6 +8,7 @@ from ..exceptions import (
     BakerUnsupportedError,
     ConfigurationError,
 )
+from ..util import classproperty
 from ..workarounds import is_fileset
 from typeguard import typechecked
 
@@ -60,16 +61,23 @@ def _determine_sequence_interface(scope_diagram, exposed_intermediates):
     return [seq_input_tags, seq_output_tags]
 
 
-def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
+def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
     class Sequence(Transform):
-        nonlocal seq_input_tags, seq_output_tags, seq_steps
+        nonlocal seq_input_tags, seq_output_tags, seq_steps, seq_name
         input_tags = seq_input_tags
         output_tags = seq_output_tags
         steps = seq_steps
+        _name = seq_name
 
         def _generate_temp_filename(self, sid):
             target_fs = self.context.fs_for_intermediates
             return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
+
+        @classproperty
+        def name(cls):
+            if cls._name:
+                return cls._name
+            return "Seq({})".format(",".join([step.name for step in cls.steps]))
 
         def script(self):
             sequence_instance_id = uuid4()
@@ -140,7 +148,9 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps):
 
 @typechecked
 def sequence(
-    seq_steps: Iterable[TransformMeta], exposed_intermediates: Set[str] = set()
+    seq_steps: Iterable[TransformMeta],
+    exposed_intermediates: Set[str] = set(),
+    name=None,
 ) -> TransformMeta:
     """
     Sequence several transforms together, hooking inputs and outputs together via tagname
@@ -149,6 +159,7 @@ def sequence(
     :param exposed_intermediates:
         Which intermediate tags generated within the sequence to expose
         to the top-level sequence of transformations
+    :param optional name: The name of the resulting transform
     :return: Transform class representing a sequence of all the transforms
     """
     seq_steps = list(seq_steps)
@@ -162,4 +173,4 @@ def sequence(
     seq_input_tags, seq_output_tags = _determine_sequence_interface(
         scope_diagram, exposed_intermediates
     )
-    return _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps)
+    return _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, name)

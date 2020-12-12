@@ -2,6 +2,7 @@ from typing import Set, Dict
 from ..exceptions import BakerError
 from ..transform import Transform, TransformMeta
 from ..fileref import FileRef
+from ..util import classproperty
 from typeguard import typechecked
 
 
@@ -37,6 +38,7 @@ def map_tags(
     base_step: TransformMeta,
     input_mapping: Dict[str, str] = {},
     output_mapping: Dict[str, str] = {},
+    name: str = None,
 ) -> TransformMeta:
     """
     Take a transform and create a new, identical transform with the tags renamed.
@@ -44,6 +46,7 @@ def map_tags(
     :param base_step: Dictionary of base_step tags to files.
     :param optional input_mapping: Mapping of old input tag names to new input tag names
     :param optional output_mapping: Mapping of old output tag names to new input tag names
+    :param optional name: The name of the resulting transform
     :return: Transform class with renamed inputs / outputs
     """
     extra_input_keys = set(input_mapping) - base_step.input_tags
@@ -63,14 +66,23 @@ def map_tags(
     mapping_input_tags = _map_names(base_step.input_tags, input_mapping)
     mapping_output_tags = _map_names(base_step.output_tags, output_mapping)
 
+    nonlocal_name = name
+
     class TagMapping(Transform):
-        nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping
+        nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping, nonlocal_name
         input_tags = mapping_input_tags
         output_tags = mapping_output_tags
+        _name = nonlocal_name
 
         _base_step = base_step
         _input_mapping = input_mapping
         _output_mapping = output_mapping
+
+        @classproperty
+        def name(self):
+            if self._name:
+                return self._name
+            return base_step.name
 
         def script(self):
             input_paths = _map_filerefs_to_new_paths(
