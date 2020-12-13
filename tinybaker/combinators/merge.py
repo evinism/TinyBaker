@@ -48,6 +48,13 @@ def merge(merge_steps: Iterable[TransformMeta], name: str = None) -> TransformMe
         steps = merge_steps
         _name = merge_name
 
+        @classmethod
+        def structure(cls):
+            struct = super(Merged, cls).structure()
+            struct["type"] = "merge"
+            struct["steps"] = [step.structure() for step in cls.steps]
+            return struct
+
         @classproperty
         def name(cls):
             if cls._name:

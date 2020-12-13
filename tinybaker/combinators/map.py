@@ -78,6 +78,13 @@ def map_tags(
         _input_mapping = input_mapping
         _output_mapping = output_mapping
 
+        @classmethod
+        def structure(cls):
+            struct = super(TagMapping, cls).structure()
+            struct["type"] = "map"
+            struct["base_step"] = cls._base_step.structure()
+            return struct
+
         @classproperty
         def name(self):
             if self._name:

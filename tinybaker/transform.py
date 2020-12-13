@@ -1,6 +1,5 @@
 from fs import open_fs
 from typing import Dict, Set, Union, List, Iterable
-import inspect
 from abc import ABC, abstractmethod
 from .fileref import FileRef
 from .workarounds import is_fileset
@@ -161,9 +160,33 @@ class Transform(metaclass=TransformMeta):
             else:
                 ensure_output_doesnt_exist(self.output_files[tag])
 
+    @classmethod
+    def structure(cls):
+        """
+        Returns a JSON-serializable dictionary describing the nested structure of the transform
+        Hopefully, this is not useful beyond developing new tools for analyzing tinybaker transforms,
+        e.g. you shouldn't have to use this for tinybaker to be useful. Open an issue if you do.
+
+        :return: Dict
+        """
+        input_tags = list(cls.input_tags)
+        input_tags.sort()
+        output_tags = list(cls.output_tags)
+        output_tags.sort()
+        return {
+            "type": "leaf",
+            "name": cls.name,
+            "input_tags": input_tags,
+            "output_tags": output_tags,
+        }
+
     @classproperty
     def name(cls):
-        """Get the name of the transform."""
+        """
+        The name of the transform.
+
+        :return: string
+        """
         return cls.__name__
 
     def run(self):

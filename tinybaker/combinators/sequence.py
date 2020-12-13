@@ -73,6 +73,13 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
             target_fs = self.context.fs_for_intermediates
             return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
 
+        @classmethod
+        def structure(cls):
+            struct = super(Sequence, cls).structure()
+            struct["type"] = "sequence"
+            struct["steps"] = [step.structure() for step in cls.steps]
+            return struct
+
         @classproperty
         def name(cls):
             if cls._name:
