@@ -49,6 +49,12 @@ class Transform(metaclass=TransformMeta):
     output_tags: TagSet = set()
     name = None
 
+    @staticmethod
+    def from_namespace(ns) -> TransformMeta:
+        raise NotImplementedError(
+            "Requires namespace transforms to be enabled! (Python > 3.7)"
+        )
+
     @typechecked
     def __init__(
         self,
