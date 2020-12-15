@@ -63,10 +63,6 @@ class BaseTag:
     def target(self):
         raise BakerError("Cannot reference target outside of a TinyBaker context!")
 
-    # This will get filled in or monkeypatched or something....
-    def _activate(fileref: FileRef):
-        self.target = fileref
-
 
 class InputTag(BaseTag):
     def __init__(self, name, annot=BaseTag.FILE):
