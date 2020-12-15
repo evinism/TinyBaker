@@ -300,7 +300,6 @@ MappedStep = map_tags(
 ```
 
 ## Filesets
-### Warning: The Filesets interface will probably change at some point in the future!
 
 If a step operates over a dynamic set of files (e.g. logs from n different days), you can use the filesets interface to specify that. Tags that begin with the prefix `fileset::` are interpreted to be filesets rather than just files.
 
@@ -331,6 +330,60 @@ Concat(
     output_paths={"concatted": "/tmp/concatted"},
     overwrite=True,
 ).run()
+```
+
+## Experimental API: File-style Transform Definitions
+
+Transforms can be specified in a script-like format:
+
+```py
+# train_model.py
+from tinybaker import InputTag, OutputTag, cli
+
+train_csv = InputTag("train_csv")
+test_csv = InputTag("test_csv")
+
+results = OutputTag("results")
+pickled_model = OutputTag("pickled_model")
+
+def script():
+  # Read from files
+  with train_csv.ref.open() as f:
+    train_data = pd.read_csv(f)
+
+  with test_csv.ref.open() as f:
+    test_data = pd.read_csv(f)
+
+  # Run computations
+  X = train_data.drop(["label"])
+  Y = train_data[["label"]]
+  [model, train_results] = train_model(X, Y)
+  test_results = test_model(model, test_data)
+
+  # Write to output files
+  with results.ref.open() as f:
+    results = train_results.formatted_summary() + test_results.formatted_summary()
+    f.write(results)
+  with pickled_model.ref.openbin() as f:
+    pickle.dump(f, model)
+
+
+if __name__ == "__main__":
+  # We can still define a cli under this format.
+  cli(locals())
+```
+
+These can be converted to transforms via:
+
+```py
+from tinybaker import Transform
+from . import train_model
+
+TrainModelTransform = Transform.from_namespace(train_model)
+
+# This can be consumed just like any other job.
+job = TrainModelTransform(input_files={...}, output_files={...})
+job.run()
 ```
 
 ## Contributing
