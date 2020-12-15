@@ -11,7 +11,7 @@ Installation via `pip install tinybaker`
 
 ## The model
 
-The main component of TinyBaker is a `Transform`: a standalone mapping from one set of files to another.
+The main component of TinyBaker is the base class `Transform`: a standalone mapping from one set of files to another.
 
 ```
                  ___________
@@ -22,7 +22,7 @@ The main component of TinyBaker is a `Transform`: a standalone mapping from one 
 ---[ file3 ]--->|___________|
 ```
 
-For example, let's say we were running predictions over a certain ML model. Such a transform might look like this:
+For example, let's say we were running predictions over a certain ML model. Such a transform might conceptually look like this:
 ```
                   ___________
 ---[ config ]--->|           |
@@ -187,11 +187,34 @@ TinyBaker can instantly turn a transform into a CLI:
 ```py
 from tinybaker import Transform, cli
 
-class SomeTransform(Transform):
+class MNISTPipeline(Transform):
+  # as defined in tests/slow/test_real_world.py
   # [...]
 
 if __name__ == "__main__":
-  cli(SampleTransform)
+  cli(MNISTPipeline)
+```
+
+The above would yield the below when run:
+
+```
+$ python ./mnist_pipeline_transform.py --help
+usage: test_real_world.py [-h] --raw_train_images RAW_TRAIN_IMAGES --raw_test_images
+                          RAW_TEST_IMAGES --accuracy ACCURACY --model MODEL
+                          [--version] [--overwrite]
+
+Execute a MNISTPipeline transform
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --raw_train_images RAW_TRAIN_IMAGES
+                        Path for output tag raw_train_images
+  --raw_test_images RAW_TEST_IMAGES
+                        Path for output tag raw_test_images
+  --accuracy ACCURACY   Path for output tag accuracy
+  --model MODEL         Path for output tag model
+  --version             show program's version number and exit
+  --overwrite           Whether to overwrite any existing output files
 ```
 
 No need to write argument parsers -- TinyBaker knows what arguments the transform needs and 

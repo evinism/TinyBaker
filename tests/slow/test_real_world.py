@@ -1,4 +1,4 @@
-from tinybaker import Transform, sequence, map_tags, merge
+from tinybaker import Transform, sequence, map_tags, merge, cli
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -92,23 +92,30 @@ BuildTestDf = map_tags(
     output_mapping={"df": "to_predict_on", "labels": "test_labels"},
 )
 
+Pipeline = sequence(
+    [
+        merge([sequence([BuildTrainDf, Train]), BuildTestDf]),
+        Predict,
+        EvaluateResults,
+    ],
+    exposed_intermediates={"model"},
+    name="MNISTPipeline",
+)
+
 
 def test_real_world():
-    Pipeline = sequence(
-        [
-            merge([sequence([BuildTrainDf, Train]), BuildTestDf]),
-            Predict,
-            EvaluateResults,
-        ]
-    )
     Pipeline(
         input_paths={
             "raw_train_images": "./tests/__data__/mnist/optdigits.tra",
             "raw_test_images": "./tests/__data__/mnist/optdigits.tes",
         },
-        output_paths={"accuracy": "/tmp/accuracy"},
+        output_paths={"accuracy": "/tmp/accuracy", "model": "/tmp/model"},
         overwrite=True,
     ).run()
 
     with open("/tmp/accuracy", "r") as f:
         assert f.read() == "0.9032"
+
+
+if __name__ == "__main__":
+    cli(Pipeline)
