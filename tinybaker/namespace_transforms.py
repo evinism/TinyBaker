@@ -8,9 +8,7 @@ _output_files_ctx = contextvars.ContextVar("output_files")
 
 
 def namespace_to_transform(BaseClass, source_ns):
-    return namespace_dict_to_transform(
-        BaseClass, source_ns.__dict__, source_ns.__name__
-    )
+    return dict_to_transform(BaseClass, source_ns.__dict__, source_ns.__name__)
 
 
 def dict_to_transform(BaseClass, ns_dict: Dict[str, Any], name_outer=None):
