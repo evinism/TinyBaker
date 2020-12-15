@@ -13,6 +13,7 @@ from .exceptions import (
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
+from .namespace_transforms import namespace_to_transform
 
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
@@ -51,9 +52,7 @@ class Transform(metaclass=TransformMeta):
 
     @staticmethod
     def from_namespace(ns) -> TransformMeta:
-        raise NotImplementedError(
-            "Requires namespace transforms to be enabled! (Python > 3.7)"
-        )
+        return namespace_to_transform(Transform, ns)
 
     @typechecked
     def __init__(

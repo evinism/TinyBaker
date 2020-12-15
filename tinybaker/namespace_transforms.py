@@ -1,13 +1,12 @@
 import contextvars
 from .fileref import FileRef
-from .transform import Transform
 from .exceptions import BakerError
 
 _input_files_ctx = contextvars.ContextVar("input_files")
 _output_files_ctx = contextvars.ContextVar("output_files")
 
 
-def namespace_to_transform(source_ns):
+def namespace_to_transform(BaseClass, source_ns):
     if not hasattr(source_ns, "script"):
         raise BakerError(
             "Namespace is missing script export! Is it a TinyBaker transform?"
@@ -27,7 +26,7 @@ def namespace_to_transform(source_ns):
         elif isinstance(value, OutputTag):
             output_tags_outer.add(value.name)
 
-    class NamespacedTransform(Transform):
+    class NamespacedTransform(BaseClass):
         nonlocal source_ns, input_tags_outer, output_tags_outer
         global _input_files_ctx, _output_files_ctx
         ns = source_ns
@@ -80,7 +79,3 @@ class OutputTag(BaseTag):
     @property
     def ref(self):
         return _output_files_ctx.get()[self.name]
-
-
-# To help combat against circular imports, also python 3.6 support.
-setattr(Transform, "from_namespace", staticmethod(namespace_to_transform))
