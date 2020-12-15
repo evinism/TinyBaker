@@ -52,6 +52,13 @@ class Transform(metaclass=TransformMeta):
 
     @staticmethod
     def from_namespace(ns) -> TransformMeta:
+        """
+        Convert a namespace to a transform. This is currently partially
+        supported, as it's undocumented and somewhat second-class to the
+        standard definition path.
+
+        :param namespace: The name
+        """
         return namespace_to_transform(Transform, ns)
 
     @typechecked
