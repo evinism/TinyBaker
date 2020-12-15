@@ -1,6 +1,7 @@
 import contextvars
 from .fileref import FileRef
 from .transform import Transform
+from .exceptions import BakerError
 
 _input_files_ctx = contextvars.ContextVar("input_files")
 _output_files_ctx = contextvars.ContextVar("output_files")
