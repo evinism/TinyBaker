@@ -13,6 +13,7 @@ from .exceptions import (
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
+from .namespace_transforms import namespace_to_transform
 
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
@@ -48,6 +49,17 @@ class Transform(metaclass=TransformMeta):
     input_tags: TagSet = set()
     output_tags: TagSet = set()
     name = None
+
+    @staticmethod
+    def from_namespace(ns) -> TransformMeta:
+        """
+        Convert a namespace to a transform. This is currently partially
+        supported, as it's undocumented and somewhat second-class to the
+        standard definition path.
+
+        :param namespace: The name
+        """
+        return namespace_to_transform(Transform, ns)
 
     @typechecked
     def __init__(

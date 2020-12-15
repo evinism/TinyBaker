@@ -19,6 +19,7 @@ scikit-learn = "*"
 m2r2 = "*"
 sphinx-autodoc-typehints = "*"
 sphinx-rtd-theme = "*"
+contextvars = "*"
 
 [pipenv]
 allow_prereleases = true
