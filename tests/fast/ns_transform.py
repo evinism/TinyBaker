@@ -1,4 +1,4 @@
-from tinybaker import InputTag, OutputTag
+from tinybaker import InputTag, OutputTag, cli
 
 infile = InputTag("infile")
 outfile = OutputTag("outfile")
@@ -10,3 +10,7 @@ def script():
 
     with outfile.ref.open() as f:
         f.write(contents + " but different")
+
+
+if __name__ == "__main__":
+    cli(locals())

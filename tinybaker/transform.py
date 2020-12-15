@@ -1,5 +1,5 @@
 from fs import open_fs
-from typing import Dict, Set, Union, List, Iterable
+from typing import Dict, Set, Union, List, Iterable, Any
 from abc import ABC, abstractmethod
 from .fileref import FileRef
 from .workarounds import is_fileset
@@ -13,7 +13,7 @@ from .exceptions import (
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
-from .namespace_transforms import namespace_to_transform
+from .namespace_transforms import namespace_to_transform, dict_to_transform
 
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
@@ -60,6 +60,16 @@ class Transform(metaclass=TransformMeta):
         :param namespace: The name
         """
         return namespace_to_transform(Transform, ns)
+
+    @staticmethod
+    def from_dict(dic) -> TransformMeta:
+        """
+        Convert a dictionary to a transform. This isn't intended as a
+        standard developer path, but rather a helper for interop's sake
+
+        :param namespace: The name
+        """
+        return dict_to_transform(Transform, dic)
 
     @typechecked
     def __init__(
@@ -221,3 +231,17 @@ class Transform(metaclass=TransformMeta):
         The script to be run on execution. This is in essence where what the transform actually does is specified
         """
         pass
+
+
+# Weird type that's equivalent to Any but, also, this describes what I'm
+# going for, so i'm doing it.
+TransformCoercable = Union[Transform, Dict, Any]
+
+
+def coerce_to_transform(coercible: TransformCoercable):
+    if isinstance(coercible, TransformMeta):
+        return coercible
+    elif isinstance(coercible, dict):
+        return Transform.from_dict(coercible)
+    else:
+        return Transform.from_namespace(coercible)

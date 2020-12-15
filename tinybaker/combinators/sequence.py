@@ -1,7 +1,7 @@
-from typing import List, Set, Dict, NewType, Tuple, Iterable
+from typing import List, Set, Dict, NewType, Tuple, Iterable, Any
 from uuid import uuid4
 import os
-from ..transform import Transform, TransformMeta
+from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..exceptions import (
     BakerError,
     TagConflictError,
@@ -155,7 +155,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
 
 @typechecked
 def sequence(
-    seq_steps: Iterable[TransformMeta],
+    seq_steps: Iterable[Any],
     exposed_intermediates: Set[str] = set(),
     name=None,
 ) -> TransformMeta:
@@ -169,7 +169,7 @@ def sequence(
     :param optional name: The name of the resulting transform
     :return: Transform class representing a sequence of all the transforms
     """
-    seq_steps = list(seq_steps)
+    seq_steps = [coerce_to_transform(step) for step in seq_steps]
     # Perform validation that the sequence makes sense.
     if len(seq_steps) < 1:
         raise BakerError("Cannot sequence fewer than 1 event")

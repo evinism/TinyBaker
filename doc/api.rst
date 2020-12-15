@@ -15,6 +15,8 @@ API reference
 
 .. autofunction:: map_tags
 
+.. autofunction:: cli
+
 .. autoclass:: BakerContext
 
 

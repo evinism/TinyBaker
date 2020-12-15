@@ -1,3 +1,4 @@
+from typing import Dict, Any
 import contextvars
 from .fileref import FileRef
 from .exceptions import BakerError
@@ -7,11 +8,17 @@ _output_files_ctx = contextvars.ContextVar("output_files")
 
 
 def namespace_to_transform(BaseClass, source_ns):
-    if not hasattr(source_ns, "script"):
+    return namespace_dict_to_transform(
+        BaseClass, source_ns.__dict__, source_ns.__name__
+    )
+
+
+def dict_to_transform(BaseClass, ns_dict: Dict[str, Any], name_outer=None):
+    if "script" not in ns_dict:
         raise BakerError(
             "Namespace is missing script export! Is it a TinyBaker transform?"
         )
-    if not callable(source_ns.script):
+    if not callable(ns_dict["script"]):
         raise BakerError(
             "Namespace's script export is not callable! Is it a TinyBaker transform?"
         )
@@ -19,18 +26,18 @@ def namespace_to_transform(BaseClass, source_ns):
     input_tags_outer = set()
     output_tags_outer = set()
 
-    for key in source_ns.__dict__:
-        value = source_ns.__dict__[key]
+    for key in ns_dict:
+        value = ns_dict[key]
         if isinstance(value, InputTag):
             input_tags_outer.add(value.name)
         elif isinstance(value, OutputTag):
             output_tags_outer.add(value.name)
 
-    class NamespacedTransform(BaseClass):
-        nonlocal source_ns, input_tags_outer, output_tags_outer
+    class DerivedTransform(BaseClass):
+        nonlocal ns_dict, input_tags_outer, output_tags_outer, name_outer
         global _input_files_ctx, _output_files_ctx
-        ns = source_ns
-        name = source_ns.__name__
+        _ns_dict = ns_dict
+        name = name_outer or "DerivedTransform"
         input_tag_ctx_ref = _input_files_ctx
         output_tag_ctx_ref = _output_files_ctx
 
@@ -41,11 +48,11 @@ def namespace_to_transform(BaseClass, source_ns):
             cls = self.__class__
             input_token = cls.input_tag_ctx_ref.set(self.input_files)
             output_token = cls.output_tag_ctx_ref.set(self.output_files)
-            cls.ns.script()
+            cls._ns_dict["script"]()
             cls.input_tag_ctx_ref.reset(input_token)
             cls.output_tag_ctx_ref.reset(output_token)
 
-    return NamespacedTransform
+    return DerivedTransform
 
 
 class BaseTag:

@@ -1,6 +1,6 @@
-from typing import Set, Dict
+from typing import Set, Dict, Any
 from ..exceptions import BakerError
-from ..transform import Transform, TransformMeta
+from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..fileref import FileRef
 from ..util import classproperty
 from typeguard import typechecked
@@ -35,7 +35,7 @@ def _invert_mapping(mapping: Dict[str, str]):
 
 @typechecked
 def map_tags(
-    base_step: TransformMeta,
+    base_step: Any,
     input_mapping: Dict[str, str] = {},
     output_mapping: Dict[str, str] = {},
     name: str = None,
@@ -43,12 +43,14 @@ def map_tags(
     """
     Take a transform and create a new, identical transform with the tags renamed.
 
-    :param base_step: Dictionary of base_step tags to files.
+    :param base_step: Base step for the transform.
     :param optional input_mapping: Mapping of old input tag names to new input tag names
     :param optional output_mapping: Mapping of old output tag names to new input tag names
     :param optional name: The name of the resulting transform
     :return: Transform class with renamed inputs / outputs
     """
+    base_step = coerce_to_transform(base_step)
+
     extra_input_keys = set(input_mapping) - base_step.input_tags
     if len(extra_input_keys) > 0:
         msg = "Unexpected key(s) for input mapping: {}".format(

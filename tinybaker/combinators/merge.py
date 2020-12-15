@@ -1,5 +1,5 @@
-from typing import List, Iterable
-from ..transform import Transform, TransformMeta
+from typing import List, Iterable, Any
+from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..exceptions import BakerError, TagConflictError
 from ..util import classproperty
 from threading import Thread
@@ -22,7 +22,7 @@ class MergeWorker(Thread):
 
 
 @typechecked
-def merge(merge_steps: Iterable[TransformMeta], name: str = None) -> TransformMeta:
+def merge(merge_steps: Iterable[Any], name: str = None) -> TransformMeta:
     """
     Merge several transformations together. Base transformations must not conflict in output.
 
@@ -30,7 +30,7 @@ def merge(merge_steps: Iterable[TransformMeta], name: str = None) -> TransformMe
     :param optional name: The name of the resulting transform
     :return: Transform class consisting of a merge between the input transforms
     """
-    merge_steps = list(merge_steps)
+    merge_steps = [coerce_to_transform(step) for step in merge_steps]
     merge_input_tags = set.union(*[step.input_tags for step in merge_steps])
     merge_output_tags = set.union(*[step.output_tags for step in merge_steps])
     if len(merge_output_tags) != sum([len(step.output_tags) for step in merge_steps]):

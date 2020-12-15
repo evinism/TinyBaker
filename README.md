@@ -130,7 +130,6 @@ class SampleTransform(Transform):
     # and output or something
     with self.output_files["some_output"].open() as f:
       write_something_to(f)
-
 ```
 
 This would then be executed via:
@@ -150,7 +149,7 @@ For a real-world example, consider training an ML model. This is a transformatio
 
 ```py
 # train_step.py
-from tinybaker import Transform
+from tinybaker import Transform, cli
 import pandas as pd
 from some_cool_ml_library import train_model, test_model
 
@@ -178,30 +177,25 @@ class TrainModelStep(Transform):
     with self.output_files["pickled_model"].openbin() as f:
       pickle.dump(f, model)
 
+if __name__ == "__main__":
+  cli(SampleTransform)
 ```
 
-The script that consumes this may look like:
+### CLI
+TinyBaker can instantly turn a transform into a CLI:
 
 ```py
-# script.py
-from .train_step import TrainModelStep
+from tinybaker import Transform, cli
 
-train_csv_path = "s3://data/train.csv"
-test_csv_path = "s3://data/test_csv"
-pickled_model_path = "./model.pkl"
-results_path = "./results.txt"
+class SomeTransform(Transform):
+  # [...]
 
-TrainModelStep(
-  input_paths={
-    "train_csv": train_csv_path,
-    "test_csv": test_csv_path,
-  },
-  output_paths={
-    "pickled_model": pickled_model_path,
-    "results": results_path
-  }
-).run()
+if __name__ == "__main__":
+  cli(SampleTransform)
 ```
+
+No need to write argument parsers -- TinyBaker knows what arguments the transform needs and 
+builds a CLI around it.
 
 ### Operating over multiple filesystems
 Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
