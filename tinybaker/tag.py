@@ -50,7 +50,7 @@ class BaseTag:
         return self.ref.path
 
     @only_for_annotation("fileset")
-    def __iter__(*args, **kwargs):
+    def __iter__(self, *args, **kwargs):
         return self.ref.__iter__(*args, **kwargs)
 
     @property

@@ -43,7 +43,7 @@ def test_filesets_work_for_outputs():
             with self.source.open() as f:
                 content = f.read()
 
-            for ref in self.copied.ref:
+            for ref in self.copied:
                 with ref.open() as f:
                     f.write(content)
 
