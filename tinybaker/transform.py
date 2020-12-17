@@ -13,14 +13,8 @@ from .exceptions import (
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
-from .namespace_transforms import (
-    namespace_to_transform,
-    dict_to_transform,
-    InputTag,
-    OutputTag,
-    input_files_ctx,
-    output_files_ctx,
-)
+from .namespace_transforms import namespace_to_transform, dict_to_transform
+from .tag import InputTag, OutputTag, input_files_ctx, output_files_ctx
 
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
