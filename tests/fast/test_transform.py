@@ -36,13 +36,13 @@ def test_opens_local_paths():
         baz = OutputTag("baz")
 
         def script(self):
-            with self.foo.ref.open() as f:
+            with self.foo.open() as f:
                 assert f.read() == "foo contents"
 
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 assert f.read() == "bar contents"
 
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 f.write("baz contents")
 
     BasicStep(
@@ -101,9 +101,9 @@ def test_in_memory_sequence():
         bar = OutputTag("bar")
 
         def script(self):
-            with self.foo.ref.open() as f:
+            with self.foo.open() as f:
                 data = f.read()
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
@@ -111,9 +111,9 @@ def test_in_memory_sequence():
         baz = OutputTag("baz")
 
         def script(self):
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 data = f.read()
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 f.write(data)
 
     bar_path = "/tmp/lolol"

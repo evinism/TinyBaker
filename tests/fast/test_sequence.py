@@ -9,9 +9,9 @@ def test_sequence():
         bar = OutputTag("bar")
 
         def script(self):
-            with self.foo.ref.open() as f:
+            with self.foo.open() as f:
                 data = f.read()
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
@@ -19,9 +19,9 @@ def test_sequence():
         baz = OutputTag("baz")
 
         def script(self):
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 data = f.read()
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 f.write(data + " processed")
 
     class StepThree(Transform):
@@ -30,11 +30,11 @@ def test_sequence():
         boppo = OutputTag("boppo")
 
         def script(self):
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 data = f.read()
-            with self.bleep.ref.open() as f:
+            with self.bleep.open() as f:
                 data2 = f.read()
-            with self.boppo.ref.open() as f:
+            with self.boppo.open() as f:
                 f.write(data + " " + data2)
 
     Seq = sequence([StepOne, StepTwo, StepThree])
@@ -60,9 +60,9 @@ def test_in_memory_intermediates():
         bar = OutputTag("bar")
 
         def script(self):
-            with self.foo.ref.open() as f:
+            with self.foo.open() as f:
                 data = f.read()
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
@@ -70,9 +70,9 @@ def test_in_memory_intermediates():
         baz = OutputTag("baz")
 
         def script(self):
-            with self.bar.ref.open() as f:
+            with self.bar.open() as f:
                 data = f.read()
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 f.write(data + " processed")
 
     class StepThree(Transform):
@@ -81,11 +81,11 @@ def test_in_memory_intermediates():
         boppo = OutputTag("boppo")
 
         def script(self):
-            with self.baz.ref.open() as f:
+            with self.baz.open() as f:
                 data = f.read()
-            with self.bleep.ref.open() as f:
+            with self.bleep.open() as f:
                 data2 = f.read()
-            with self.boppo.ref.open() as f:
+            with self.boppo.open() as f:
                 f.write(data + " " + data2)
 
     Seq = sequence([StepOne, StepTwo, StepThree])

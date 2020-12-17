@@ -5,10 +5,10 @@ outfile = OutputTag("outfile")
 
 
 def script():
-    with infile.ref.open() as f:
+    with infile.open() as f:
         contents = f.read()
 
-    with outfile.ref.open() as f:
+    with outfile.open() as f:
         f.write(contents + " but different")
 
 

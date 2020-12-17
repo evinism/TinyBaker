@@ -40,7 +40,7 @@ def test_filesets_work_for_outputs():
         copied = OutputTag("fileset::copied")
 
         def script(self):
-            with self.source.ref.open() as f:
+            with self.source.open() as f:
                 content = f.read()
 
             for ref in self.copied.ref:

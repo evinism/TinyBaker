@@ -15,16 +15,16 @@ class BuildDf(Transform):
     labels = OutputTag("labels")
 
     def script(self):
-        with self.raw_images.ref.open() as f:
+        with self.raw_images.open() as f:
             data = np.genfromtxt(f, delimiter=",")
         labels = data[:, -1].astype(int)
         images = data[:, 0:-1] / 16.0
 
         df = pd.DataFrame(images)
         labels_df = pd.DataFrame(data={"label": list(labels)})
-        with self.df.ref.openbin() as f:
+        with self.df.openbin() as f:
             df.to_pickle(f)
-        with self.labels.ref.openbin() as f:
+        with self.labels.openbin() as f:
             labels_df.to_pickle(f)
 
 
@@ -34,16 +34,16 @@ class Train(Transform):
     model = OutputTag("model")
 
     def script(self):
-        with self.train_df.ref.openbin() as f:
+        with self.train_df.openbin() as f:
             X = pd.read_pickle(f)
-        with self.train_labels.ref.openbin() as f:
+        with self.train_labels.openbin() as f:
             y = pd.read_pickle(f)
 
         # Create a classifier: a support vector classifier
         classifier = svm.SVC(gamma=0.001)
 
         model = classifier.fit(X, y)
-        with self.model.ref.openbin() as f:
+        with self.model.openbin() as f:
             pickle.dump(model, f)
 
 
@@ -53,13 +53,13 @@ class Predict(Transform):
     predictions = OutputTag("predictions")
 
     def script(self):
-        with self.model.ref.openbin() as f:
+        with self.model.openbin() as f:
             model = pickle.load(f)
-        with self.to_predict_on.ref.openbin() as f:
+        with self.to_predict_on.openbin() as f:
             X = pd.read_pickle(f)
 
         predictions = model.predict(X)
-        with self.predictions.ref.openbin() as f:
+        with self.predictions.openbin() as f:
             pickle.dump(predictions, f)
 
 
@@ -69,9 +69,9 @@ class EvaluateResults(Transform):
     accuracy = OutputTag("accuracy")
 
     def script(self):
-        with self.predictions.ref.openbin() as f:
+        with self.predictions.openbin() as f:
             pred = pd.read_pickle(f)
-        with self.test_labels.ref.openbin() as f:
+        with self.test_labels.openbin() as f:
             real = list(pd.read_pickle(f)["label"])
         total = len(pred)
         correct = 0
@@ -81,7 +81,7 @@ class EvaluateResults(Transform):
                 correct = correct + 1
         accuracy = round(correct * 1.0 / total, 4)
 
-        with self.accuracy.ref.open() as f:
+        with self.accuracy.open() as f:
             f.write(str(accuracy))
 
 

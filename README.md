@@ -348,10 +348,10 @@ pickled_model = OutputTag("pickled_model")
 
 def script():
   # Read from files
-  with train_csv.ref.open() as f:
+  with train_csv.open() as f:
     train_data = pd.read_csv(f)
 
-  with test_csv.ref.open() as f:
+  with test_csv.open() as f:
     test_data = pd.read_csv(f)
 
   # Run computations
@@ -361,10 +361,10 @@ def script():
   test_results = test_model(model, test_data)
 
   # Write to output files
-  with results.ref.open() as f:
+  with results.open() as f:
     results = train_results.formatted_summary() + test_results.formatted_summary()
     f.write(results)
-  with pickled_model.ref.openbin() as f:
+  with pickled_model.openbin() as f:
     pickle.dump(f, model)
 
 
