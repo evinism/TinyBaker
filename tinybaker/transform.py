@@ -13,7 +13,14 @@ from .exceptions import (
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
-from .namespace_transforms import namespace_to_transform, dict_to_transform
+from .namespace_transforms import (
+    namespace_to_transform,
+    dict_to_transform,
+    InputTag,
+    OutputTag,
+    input_files_ctx,
+    output_files_ctx,
+)
 
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
@@ -45,10 +52,6 @@ class Transform(metaclass=TransformMeta):
     :param optional context: The BakerContext to use for this transformation
     :param optional overwrite: Whether or not to configure the transformation to overwrite output files on execution
     """
-
-    input_tags: TagSet = set()
-    output_tags: TagSet = set()
-    name = None
 
     @staticmethod
     def from_namespace(ns) -> TransformMeta:
@@ -90,6 +93,14 @@ class Transform(metaclass=TransformMeta):
         self.context = context
         self.overwrite = overwrite
         self._current_run_info = None
+
+    @classproperty
+    def input_tags(cls):
+        return {tag for tag in cls.__dict__ if isinstance(cls.__dict__[tag], InputTag)}
+
+    @classproperty
+    def output_tags(cls):
+        return {tag for tag in cls.__dict__ if isinstance(cls.__dict__[tag], OutputTag)}
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
         if set(input_paths) != self.input_tags:
@@ -216,14 +227,21 @@ class Transform(metaclass=TransformMeta):
         self.context.run_transform(self)
 
     def _exec_with_run_info(self, run_info):
-        self._current_run_info = run_info
-        self._init_file_dicts(self.input_paths, self.output_paths)
-        self._validate_file_existence()
-        if not run_info:
-            raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
-                "No current run information, somehow!"
-            )
-        self.script()
+        # Set
+        input_token = input_files_ctx.set(self.input_files)
+        output_token = output_files_ctx.set(self.output_files)
+        try:
+            self._current_run_info = run_info
+            self._init_file_dicts(self.input_paths, self.output_paths)
+            self._validate_file_existence()
+            if not run_info:
+                raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
+                    "No current run information, somehow!"
+                )
+            self.script()
+        finally:
+            input_files_ctx.reset(input_token)
+            output_files_ctx.reset(output_token)
 
     @abstractmethod
     def script(self):

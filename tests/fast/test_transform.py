@@ -1,12 +1,13 @@
 import pytest
-from tinybaker import Transform
+from tinybaker import Transform, InputTag, OutputTag
 from tinybaker.exceptions import FileSetError, BakerError
 
 
 def test_validate_paths():
     class BasicStep(Transform):
-        input_tags = {"foo", "bar"}
-        output_tags = {"baz"}
+        foo = InputTag("foo")
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
             pass

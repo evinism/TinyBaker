@@ -3,8 +3,8 @@ import contextvars
 from .fileref import FileRef
 from .exceptions import BakerError
 
-_input_files_ctx = contextvars.ContextVar("input_files")
-_output_files_ctx = contextvars.ContextVar("output_files")
+input_files_ctx = contextvars.ContextVar("input_files")
+output_files_ctx = contextvars.ContextVar("output_files")
 
 
 def namespace_to_transform(BaseClass, source_ns):
@@ -33,22 +33,15 @@ def dict_to_transform(BaseClass, ns_dict: Dict[str, Any], name_outer=None):
 
     class DerivedTransform(BaseClass):
         nonlocal ns_dict, input_tags_outer, output_tags_outer, name_outer
-        global _input_files_ctx, _output_files_ctx
         _ns_dict = ns_dict
         name = name_outer or "DerivedTransform"
-        input_tag_ctx_ref = _input_files_ctx
-        output_tag_ctx_ref = _output_files_ctx
 
         input_tags = input_tags_outer
         output_tags = output_tags_outer
 
         def script(self):
             cls = self.__class__
-            input_token = cls.input_tag_ctx_ref.set(self.input_files)
-            output_token = cls.output_tag_ctx_ref.set(self.output_files)
             cls._ns_dict["script"]()
-            cls.input_tag_ctx_ref.reset(input_token)
-            cls.output_tag_ctx_ref.reset(output_token)
 
     return DerivedTransform
 
@@ -74,7 +67,7 @@ class InputTag(BaseTag):
 
     @property
     def ref(self):
-        return _input_files_ctx.get()[self.name]
+        return input_files_ctx.get()[self.name]
 
 
 class OutputTag(BaseTag):
@@ -83,4 +76,4 @@ class OutputTag(BaseTag):
 
     @property
     def ref(self):
-        return _output_files_ctx.get()[self.name]
+        return output_files_ctx.get()[self.name]
