@@ -96,11 +96,19 @@ class Transform(metaclass=TransformMeta):
 
     @classproperty
     def input_tags(cls):
-        return {tag for tag in cls.__dict__ if isinstance(cls.__dict__[tag], InputTag)}
+        return {
+            cls.__dict__[tag].name
+            for tag in cls.__dict__
+            if isinstance(cls.__dict__[tag], InputTag)
+        }
 
     @classproperty
     def output_tags(cls):
-        return {tag for tag in cls.__dict__ if isinstance(cls.__dict__[tag], OutputTag)}
+        return {
+            cls.__dict__[tag].name
+            for tag in cls.__dict__
+            if isinstance(cls.__dict__[tag], OutputTag)
+        }
 
     def _init_file_dicts(self, input_paths: PathDict, output_paths: PathDict):
         if set(input_paths) != self.input_tags:

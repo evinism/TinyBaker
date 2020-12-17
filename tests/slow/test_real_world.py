@@ -1,4 +1,4 @@
-from tinybaker import Transform, sequence, map_tags, merge, cli
+from tinybaker import Transform, sequence, map_tags, merge, cli, InputTag, OutputTag
 from sklearn import datasets, svm, metrics
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -10,64 +10,68 @@ digits = datasets.load_digits()
 
 
 class BuildDf(Transform):
-    input_tags = {"raw_images"}
-    output_tags = {"df", "labels"}
+    raw_images = InputTag("raw_images")
+    df = OutputTag("df")
+    labels = OutputTag("labels")
 
     def script(self):
-        with self.input_files["raw_images"].open() as f:
+        with self.raw_images.ref.open() as f:
             data = np.genfromtxt(f, delimiter=",")
         labels = data[:, -1].astype(int)
         images = data[:, 0:-1] / 16.0
 
         df = pd.DataFrame(images)
         labels_df = pd.DataFrame(data={"label": list(labels)})
-        with self.output_files["df"].openbin() as f:
+        with self.df.ref.openbin() as f:
             df.to_pickle(f)
-        with self.output_files["labels"].openbin() as f:
+        with self.labels.ref.openbin() as f:
             labels_df.to_pickle(f)
 
 
 class Train(Transform):
-    input_tags = {"train_df", "train_labels"}
-    output_tags = {"model"}
+    train_df = InputTag("train_df")
+    train_labels = InputTag("train_labels")
+    model = OutputTag("model")
 
     def script(self):
-        with self.input_files["train_df"].openbin() as f:
+        with self.train_df.ref.openbin() as f:
             X = pd.read_pickle(f)
-        with self.input_files["train_labels"].openbin() as f:
+        with self.train_labels.ref.openbin() as f:
             y = pd.read_pickle(f)
 
         # Create a classifier: a support vector classifier
         classifier = svm.SVC(gamma=0.001)
 
         model = classifier.fit(X, y)
-        with self.output_files["model"].openbin() as f:
+        with self.model.ref.openbin() as f:
             pickle.dump(model, f)
 
 
 class Predict(Transform):
-    input_tags = {"to_predict_on", "model"}
-    output_tags = {"predictions"}
+    to_predict_on = InputTag("to_predict_on")
+    model = InputTag("model")
+    predictions = OutputTag("predictions")
 
     def script(self):
-        with self.input_files["model"].openbin() as f:
+        with self.model.ref.openbin() as f:
             model = pickle.load(f)
-        with self.input_files["to_predict_on"].openbin() as f:
+        with self.to_predict_on.ref.openbin() as f:
             X = pd.read_pickle(f)
 
         predictions = model.predict(X)
-        with self.output_files["predictions"].openbin() as f:
+        with self.predictions.ref.openbin() as f:
             pickle.dump(predictions, f)
 
 
 class EvaluateResults(Transform):
-    input_tags = {"predictions", "test_labels"}
-    output_tags = {"accuracy"}
+    predictions = InputTag("predictions")
+    test_labels = InputTag("test_labels")
+    accuracy = OutputTag("accuracy")
 
     def script(self):
-        with self.input_files["predictions"].openbin() as f:
+        with self.predictions.ref.openbin() as f:
             pred = pd.read_pickle(f)
-        with self.input_files["test_labels"].openbin() as f:
+        with self.test_labels.ref.openbin() as f:
             real = list(pd.read_pickle(f)["label"])
         total = len(pred)
         correct = 0
@@ -77,7 +81,7 @@ class EvaluateResults(Transform):
                 correct = correct + 1
         accuracy = round(correct * 1.0 / total, 4)
 
-        with self.output_files["accuracy"].open() as f:
+        with self.accuracy.ref.open() as f:
             f.write(str(accuracy))
 
 

@@ -31,17 +31,18 @@ def test_validate_paths():
 
 def test_opens_local_paths():
     class BasicStep(Transform):
-        input_tags = {"foo", "bar"}
-        output_tags = {"baz"}
+        foo = InputTag("foo")
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
-            with self.input_files["foo"].open() as f:
+            with self.foo.ref.open() as f:
                 assert f.read() == "foo contents"
 
-            with self.input_files["bar"].open() as f:
+            with self.bar.ref.open() as f:
                 assert f.read() == "bar contents"
 
-            with self.output_files["baz"].open() as f:
+            with self.baz.ref.open() as f:
                 f.write("baz contents")
 
     BasicStep(
@@ -56,8 +57,9 @@ def test_opens_local_paths():
 
 def test_fails_with_missing_paths():
     class BasicStep(Transform):
-        input_tags = {"foo", "bar"}
-        output_tags = {"baz"}
+        foo = InputTag("foo")
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
             pass
@@ -75,8 +77,9 @@ def test_fails_with_missing_paths():
 
 def test_fails_with_circular_inputs():
     class BasicStep(Transform):
-        input_tags = {"foo", "bar"}
-        output_tags = {"baz"}
+        foo = InputTag("foo")
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
             pass
@@ -94,23 +97,23 @@ def test_fails_with_circular_inputs():
 
 def test_in_memory_sequence():
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
 
         def script(self):
-            with self.input_files["foo"].open() as f:
+            with self.foo.ref.open() as f:
                 data = f.read()
-            with self.output_files["bar"].open() as f:
+            with self.bar.ref.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
-        input_tags = {"bar"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
-            with self.input_files["bar"].open() as f:
+            with self.bar.ref.open() as f:
                 data = f.read()
-            with self.output_files["baz"].open() as f:
+            with self.baz.ref.open() as f:
                 f.write(data)
 
     bar_path = "/tmp/lolol"

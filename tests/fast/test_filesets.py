@@ -1,5 +1,5 @@
 import pytest
-from tinybaker import Transform, fileset, sequence
+from tinybaker import Transform, fileset, sequence, InputTag, OutputTag
 from tinybaker.exceptions import (
     FileSetError,
     BakerError,
@@ -36,14 +36,14 @@ def test_filesets_work_for_inputs():
 
 def test_filesets_work_for_outputs():
     class Concat(Transform):
-        input_tags = {"source"}
-        output_tags = {fileset("copied")}
+        source = InputTag("source")
+        copied = OutputTag("fileset::copied")
 
         def script(self):
-            with self.input_files["source"].open() as f:
+            with self.source.ref.open() as f:
                 content = f.read()
 
-            for ref in self.output_files[fileset("copied")]:
+            for ref in self.copied.ref:
                 with ref.open() as f:
                     f.write(content)
 

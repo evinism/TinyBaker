@@ -50,9 +50,7 @@ class BaseTag:
     FILE = "file"
     FILESET = "fileset"
 
-    def __init__(self, name, annot, in_or_out):
-        if annot == BaseTag.FILESET:
-            name = "fileset::{}".name
+    def __init__(self, name, in_or_out):
         self.name = name
         self.in_or_out = in_or_out
 
@@ -62,8 +60,8 @@ class BaseTag:
 
 
 class InputTag(BaseTag):
-    def __init__(self, name, annot=BaseTag.FILE):
-        super().__init__(name, annot, "in")
+    def __init__(self, name):
+        super().__init__(name, "in")
 
     @property
     def ref(self):
@@ -71,8 +69,8 @@ class InputTag(BaseTag):
 
 
 class OutputTag(BaseTag):
-    def __init__(self, name, annot=BaseTag.FILE):
-        super().__init__(name, annot, "out")
+    def __init__(self, name):
+        super().__init__(name, "out")
 
     @property
     def ref(self):
