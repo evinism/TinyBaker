@@ -111,24 +111,24 @@ Extra file dependencies are propagated to the top level of a sequence, ensuring 
 The following describes a minimal transform one can define in TinyBaker
 
 ```py
-from tinybaker import Transform
+from tinybaker import Transform, InputTag, OutputTag
 
 class SampleTransform(Transform):
   # 1 tag per input file
-  input_tags = {"first_input", "second_input"}
-  output_tags = {"some_output"}
+  first_input = InputTag("first_input")
+  second_input = InputTag("second_input")
+  some_output = OutputTag("some_output")
 
   # self.script describes what actually executes when the transform task runs
   script(self):
-    # Transforms provide self.input_files and self.output_files, dictionaries with
-    # fully-qualified references to files that can be directly opened:
-    with self.input_files["first_input"].open() as f:
+    # Within scripts, one can operate on tags as if they're FileRefs
+    with self.first_input.open() as f:
       do_something_with(f)
-    with self.input_files["second_input"].open() as f:
+    with self.second_input.open() as f:
       do_something_else_with(f)
 
     # and output or something
-    with self.output_files["some_output"].open() as f:
+    with self.some_output.open() as f:
       write_something_to(f)
 ```
 
@@ -149,19 +149,21 @@ For a real-world example, consider training an ML model. This is a transformatio
 
 ```py
 # train_step.py
-from tinybaker import Transform, cli
+from tinybaker import Transform, cli, InputTag, OutputTag
 import pandas as pd
 from some_cool_ml_library import train_model, test_model
 
 class TrainModelStep(Transform):
-  input_tags = {"train_csv", "test_csv"}
-  output_tags = {"pickled_model", "results"}
+  train_csv = InputTag("train_csv")
+  test_csv = InputTag("test_csv")
+  pickled_model = OutputTag("pickled_model")
+  results = OutputTag("results")
 
   def script():
     # Read from files
-    with self.input_files["train_csv"].open() as f:
+    with self.train_csv.open() as f:
       train_data = pd.read_csv(f)
-    with self.input_files["test_csv"].open() as f:
+    with self.test_csv.open() as f:
       test_data = pd.read_csv(f)
 
     # Run computations
@@ -171,10 +173,10 @@ class TrainModelStep(Transform):
     test_results = test_model(model, test_data)
 
     # Write to output files
-    with self.output_files["results"].open() as f:
+    with self.results.open() as f:
       results = train_results.formatted_summary() + test_results.formatted_summary()
       f.write(results)
-    with self.output_files["pickled_model"].openbin() as f:
+    with self.pickled_model.openbin() as f:
       pickle.dump(f, model)
 
 if __name__ == "__main__":
@@ -238,23 +240,24 @@ We can compose several build steps together using the methods `merge` and `seque
 from tinybaker import Transform, sequence
 
 class CleanLogs(Transform):
-  input_files={"raw_logfile"}
-  output_files={"cleaned_logfile"}
+  raw_logfile = InputTag("raw_logfile")
+  cleaned_logfile = OutputTag("cleaned_logfile")
   # ...
 
 class BuildDataframe(Transform):
-  input_files={"cleaned_logfile"}
-  output_files={"dataframe"}
+  cleaned_logfile = InputTag("cleaned_logfile")
+  dataframe = OutputTag("dataframe")
   # ...
 
 class BuildLabels(Transform):
-  input_files={"cleaned_logfile"}
-  output_files={"labels"}
+  cleaned_logfile = InputTag("cleaned_logfile")
+  labels = OutputTag("labels")
   # ...
 
 class TrainModelFromDataframe(Transform):
-  input_files={"dataframe", "labels"}
-  output_files={"trained_model"}
+  dataframe = InputTag("dataframe")
+  labels = InputTag("labels")
+  trained_model = OutputTag("trained_model")
   # ...
 
 
@@ -311,16 +314,16 @@ A concat task can be done as follows:
 
 ```py
 class Concat(Transform):
-    input_tags = {"fileset::files"}
-    output_tags = {"concatted"}
+    files = InputTag("fileset::files")
+    concatted = InputTag("concatted")
 
     def script(self):
         content = ""
-        for ref in self.input_files["fileset::files"]:
+        for ref in self.files:
             with ref.open() as f:
                 content = content + f.read()
 
-        with self.output_files["concatted"].open() as f:
+        with self.concatted.open() as f:
             f.write(content)
 
 Concat(
@@ -348,10 +351,10 @@ pickled_model = OutputTag("pickled_model")
 
 def script():
   # Read from files
-  with train_csv.ref.open() as f:
+  with train_csv.open() as f:
     train_data = pd.read_csv(f)
 
-  with test_csv.ref.open() as f:
+  with test_csv.open() as f:
     test_data = pd.read_csv(f)
 
   # Run computations
@@ -361,10 +364,10 @@ def script():
   test_results = test_model(model, test_data)
 
   # Write to output files
-  with results.ref.open() as f:
+  with results.open() as f:
     results = train_results.formatted_summary() + test_results.formatted_summary()
     f.write(results)
-  with pickled_model.ref.openbin() as f:
+  with pickled_model.openbin() as f:
     pickle.dump(f, model)
 
 

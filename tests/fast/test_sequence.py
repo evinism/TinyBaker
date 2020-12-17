@@ -1,39 +1,40 @@
 import pytest
-from tinybaker import sequence, Transform
+from tinybaker import sequence, Transform, InputTag, OutputTag
 from tinybaker.context import BakerContext
 
 
 def test_sequence():
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
 
         def script(self):
-            with self.input_files["foo"].open() as f:
+            with self.foo.open() as f:
                 data = f.read()
-            with self.output_files["bar"].open() as f:
+            with self.bar.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
-        input_tags = {"bar"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
-            with self.input_files["bar"].open() as f:
+            with self.bar.open() as f:
                 data = f.read()
-            with self.output_files["baz"].open() as f:
+            with self.baz.open() as f:
                 f.write(data + " processed")
 
     class StepThree(Transform):
-        input_tags = {"baz", "bleep"}
-        output_tags = {"boppo"}
+        baz = InputTag("baz")
+        bleep = InputTag("bleep")
+        boppo = OutputTag("boppo")
 
         def script(self):
-            with self.input_files["baz"].open() as f:
+            with self.baz.open() as f:
                 data = f.read()
-            with self.input_files["bleep"].open() as f:
+            with self.bleep.open() as f:
                 data2 = f.read()
-            with self.output_files["boppo"].open() as f:
+            with self.boppo.open() as f:
                 f.write(data + " " + data2)
 
     Seq = sequence([StepOne, StepTwo, StepThree])
@@ -55,35 +56,36 @@ def test_in_memory_intermediates():
     in_memory_context = BakerContext(fs_for_intermediates="mem")
 
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
 
         def script(self):
-            with self.input_files["foo"].open() as f:
+            with self.foo.open() as f:
                 data = f.read()
-            with self.output_files["bar"].open() as f:
+            with self.bar.open() as f:
                 f.write(data)
 
     class StepTwo(Transform):
-        input_tags = {"bar"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
-            with self.input_files["bar"].open() as f:
+            with self.bar.open() as f:
                 data = f.read()
-            with self.output_files["baz"].open() as f:
+            with self.baz.open() as f:
                 f.write(data + " processed")
 
     class StepThree(Transform):
-        input_tags = {"baz", "bleep"}
-        output_tags = {"boppo"}
+        baz = InputTag("baz")
+        bleep = InputTag("bleep")
+        boppo = OutputTag("boppo")
 
         def script(self):
-            with self.input_files["baz"].open() as f:
+            with self.baz.open() as f:
                 data = f.read()
-            with self.input_files["bleep"].open() as f:
+            with self.bleep.open() as f:
                 data2 = f.read()
-            with self.output_files["boppo"].open() as f:
+            with self.boppo.open() as f:
                 f.write(data + " " + data2)
 
     Seq = sequence([StepOne, StepTwo, StepThree])
@@ -104,22 +106,24 @@ def test_in_memory_intermediates():
 
 def test_complicated_dep_path():
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
 
         def script(self):
             pass
 
     class StepTwo(Transform):
-        input_tags = {"bar", "bongo"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        bongo = InputTag("bongo")
+        baz = OutputTag("baz")
 
         def script(self):
             pass
 
     class StepThree(Transform):
-        input_tags = {"baz", "bingo"}
-        output_tags = {"bop"}
+        baz = InputTag("baz")
+        bleep = InputTag("bingo")
+        boppo = OutputTag("bop")
 
         def script(self):
             pass
@@ -131,29 +135,29 @@ def test_complicated_dep_path():
 
 def test_exposed_intermediates():
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
 
         def script(self):
             pass
 
     class StepTwo(Transform):
-        input_tags = {"bar"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
             pass
 
     class StepThree(Transform):
-        input_tags = {"baz"}
-        output_tags = {"bop"}
+        baz = InputTag("baz")
+        bop = OutputTag("bop")
 
         def script(self):
             pass
 
     class StepFour(Transform):
-        input_tags = {"bop"}
-        output_tags = {"bip"}
+        bop = InputTag("bop")
+        bip = OutputTag("bip")
 
         def script(self):
             pass
@@ -166,22 +170,24 @@ def test_exposed_intermediates():
 
 def test_gap_in_output_and_input():
     class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar", "bingo"}
+        foo = InputTag("foo")
+        bar = OutputTag("bar")
+        bingo = OutputTag("bingo")
 
         def script(self):
             pass
 
     class StepTwo(Transform):
-        input_tags = {"bar"}
-        output_tags = {"baz"}
+        bar = InputTag("bar")
+        baz = OutputTag("baz")
 
         def script(self):
             pass
 
     class StepThree(Transform):
-        input_tags = {"baz", "bingo"}
-        output_tags = {"bop"}
+        baz = InputTag("baz")
+        bingo = InputTag("bingo")
+        bop = OutputTag("bop")
 
         def script(self):
             pass
