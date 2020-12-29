@@ -2,7 +2,8 @@ from typing import Union
 from fs import open_fs
 from fs.opener.parse import parse_fs_url
 from .exceptions import SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
-from io import BufferedWriter, BufferedReader, TextIOWrapper
+from io import BufferedWriter, BufferedReader, TextIOWrapper, StringIO, BytesIO
+from base64 import b64decode
 
 
 def get_fname(path):
@@ -37,6 +38,9 @@ class FileRef:
 
         :return: Whether the file exists
         """
+        if self._get_protocol() == "data":
+            return True
+
         filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
         if filesystem:
             with filesystem:
@@ -45,6 +49,16 @@ class FileRef:
 
     def _open_helper(self, bin=False):
         self.opened = True
+
+        # TODO: Get a bunch of shit done.
+        if self._get_protocol() == "data":
+            data = b64decode(self.path.split("://")[1])
+            if self._write:
+                raise BakerError("Cannot write to data protocol")
+            if bin:
+                return BytesIO(initial_bytes=data)
+            else:
+                return StringIO(initial_value=data.decode("utf-8"))
 
         # TERRIBLE AND UGLY
         filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
@@ -87,7 +101,7 @@ class FileRef:
 
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url
-        protocol = self.path.split("://")[0]
+        protocol = self._get_protocol()
         if protocol in self.run_info.open_fses:
             # So we see if it's got an appropriate url before trying:
             parsed = parse_fs_url(self.path)
@@ -96,3 +110,6 @@ class FileRef:
         fname = get_fname(self.path)
         truncated_path = get_truncated_path(self.path, fname)
         return (open_fs(truncated_path), None, fname)
+
+    def _get_protocol(self):
+        return self.path.split("://")[0]
