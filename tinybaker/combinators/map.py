@@ -69,9 +69,36 @@ def map_tags(
     mapping_output_tags = _map_names(base_step.output_tags, output_mapping)
 
     nonlocal_name = name
+    return _create_tag_class(
+        mapping_input_tags,
+        mapping_output_tags,
+        base_step,
+        input_mapping,
+        output_mapping,
+        nonlocal_name,
+    )
 
+
+def _create_tag_class(
+    mapping_input_tags,
+    mapping_output_tags,
+    base_step,
+    input_mapping,
+    output_mapping,
+    nonlocal_name,
+):
     class TagMapping(Transform):
         nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping, nonlocal_name
+        __creation_values__ = (
+            _create_tag_class,
+            mapping_input_tags,
+            mapping_output_tags,
+            base_step,
+            input_mapping,
+            output_mapping,
+            nonlocal_name,
+        )
+
         input_tags = mapping_input_tags
         output_tags = mapping_output_tags
         _name = nonlocal_name

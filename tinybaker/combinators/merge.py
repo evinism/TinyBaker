@@ -38,9 +38,21 @@ def merge(merge_steps: Iterable[Any], name: str = None) -> TransformMeta:
         raise TagConflictError("Output conflicts while merging!")
 
     merge_name = name
+    return _create_merge_class(
+        merge_steps, merge_input_tags, merge_output_tags, merge_name
+    )
 
+
+def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_name):
     class Merged(Transform):
         nonlocal merge_steps, merge_input_tags, merge_output_tags, merge_name
+        __creation_values__ = (
+            _create_merge_class,
+            merge_steps,
+            merge_input_tags,
+            merge_output_tags,
+            merge_name,
+        )
 
         input_tags = merge_input_tags
         output_tags = merge_output_tags

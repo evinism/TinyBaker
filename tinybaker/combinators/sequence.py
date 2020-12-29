@@ -64,6 +64,15 @@ def _determine_sequence_interface(scope_diagram, exposed_intermediates):
 def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
     class Sequence(Transform):
         nonlocal seq_input_tags, seq_output_tags, seq_steps, seq_name
+        # Hack to ensure we can pickle / unpickle these dynamic classes
+        __creation_values__ = (
+            _build_sequence_class,
+            seq_input_tags,
+            seq_output_tags,
+            seq_steps,
+            seq_name,
+        )
+
         input_tags = seq_input_tags
         output_tags = seq_output_tags
         steps = seq_steps
