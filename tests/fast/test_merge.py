@@ -116,20 +116,23 @@ def test_conflicting_inputs():
     Merged.output_tags = {"bar", "baz"}
 
 
+class MP_StepOne(Transform):
+    input_tags = {"foo"}
+    output_tags = {"bar"}
+
+    def script(self):
+        with self.input_files["foo"].open() as f:
+            data = f.read()
+        with self.output_files["bar"].open() as f:
+            f.write(data + " processed")
+
+
+MP_StepTwo = map_tags(MP_StepOne, {"foo": "bloop"}, {"bar": "bleep"})
+
+
 def test_multiprocessed_merge():
-    class StepOne(Transform):
-        input_tags = {"foo"}
-        output_tags = {"bar"}
 
-        def script(self):
-            with self.input_files["foo"].open() as f:
-                data = f.read()
-            with self.output_files["bar"].open() as f:
-                f.write(data + " processed")
-
-    StepTwo = map_tags(StepOne, {"foo": "bloop"}, {"bar": "bleep"})
-
-    Merged = merge([StepOne, StepTwo])
+    Merged = merge([MP_StepOne, MP_StepTwo])
 
     Merged(
         input_paths={

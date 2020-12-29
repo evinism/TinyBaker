@@ -9,7 +9,8 @@ from typeguard import typechecked
 from .combinatormeta import CombinatorMeta
 
 
-def _mp_run(instance, current_run_info):
+def _mp_run(arg):
+    instance, current_run_info = arg
     return instance._exec_with_run_info(current_run_info)
 
 
@@ -121,9 +122,9 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
                 queue.join()
             elif self.context.parallel_mode == "multiprocessing":
                 with Pool(min(len(instances), self.context.max_processes)) as p:
-                    mp_args = (
+                    mp_args = [
                         (instance, self._current_run_info) for instance in instances
-                    )
+                    ]
                     p.map(_mp_run, mp_args)
             else:
                 for instance in instances:

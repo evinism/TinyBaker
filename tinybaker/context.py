@@ -24,7 +24,7 @@ class RunInfo:
     # This defines what's shared between processes. Right now, the
     # answer is "nothing", which we can get away with due to requiring
     # nvtemp for multiprocessing.
-    def __reduce__():
+    def __reduce__(self):
         return (RunInfo, ())
 
 
