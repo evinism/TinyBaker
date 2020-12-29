@@ -1,4 +1,4 @@
-# TinyBaker: Composable, first-order file-to-file transformations in Python
+# TinyBaker: Composable, first-order, file-to-file transformations in Python
 ![Python Package](https://github.com/evinism/tinybaker/workflows/Python%20package/badge.svg)
 
 *TinyBaker is in beta release.*
