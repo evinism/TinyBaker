@@ -48,7 +48,7 @@ class FileRef:
         return previously_opened_filesystem.exists(resource)
 
     def _open_helper(self, bin=False):
-        self.opened = True
+        self.touch()
 
         # TODO: Get a bunch of shit done.
         if self._get_protocol() == "data":
@@ -98,6 +98,16 @@ class FileRef:
         :return: The stream for interacting with the FileRef
         """
         return self._open_helper(True)
+
+    def touch(self):
+        """
+        Mark the FileRef as being opened, without actually opening it.
+
+        This is useful if you want to perform some operation on a fileref
+        outside of TinyBaker's file abstractions, e.g. `tag.touch()`,
+        followed by `make_some_app_specific_mutation_on(tag.path)`
+        """
+        self.opened = True
 
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url
