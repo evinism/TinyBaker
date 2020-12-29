@@ -37,3 +37,7 @@ class FileSetError(BakerError):
 
 class CircularFileSetError(BakerError):
     pass
+
+
+class UnusedFileWarning(Warning):
+    pass
