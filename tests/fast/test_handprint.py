@@ -74,3 +74,19 @@ def test_to_and_from_handprint_pickle():
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"
+
+
+def test_bare_pickle():
+    Seq = pickle.loads(pickle.dumps(BaseSeq))
+
+    Seq(
+        input_paths={
+            "foo": "./tests/__data__/foo.txt",
+            "bleep": "./tests/__data__/bleep.txt",
+        },
+        output_paths={"boppo": "/tmp/boppo"},
+        overwrite=True,
+    ).run()
+
+    with open("/tmp/boppo", "r") as f:
+        assert f.read() == "foo contents processed bleep contents"

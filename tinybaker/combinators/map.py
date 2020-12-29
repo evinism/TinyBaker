@@ -4,6 +4,7 @@ from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..fileref import FileRef
 from ..util import classproperty
 from typeguard import typechecked
+from .combinatormeta import CombinatorMeta
 
 
 def _map_names(name_set: Set[str], mapping: Dict[str, str]):
@@ -87,7 +88,7 @@ def _create_tag_class(
     output_mapping,
     nonlocal_name,
 ):
-    class TagMapping(Transform):
+    class TagMapping(Transform, metaclass=CombinatorMeta):
         nonlocal mapping_input_tags, mapping_output_tags, base_step, input_mapping, output_mapping, nonlocal_name
         __creation_values__ = (
             _create_tag_class,

@@ -5,6 +5,7 @@ from ..util import classproperty
 from threading import Thread
 from queue import Queue
 from typeguard import typechecked
+from .combinatormeta import CombinatorMeta
 
 
 class MergeWorker(Thread):
@@ -44,7 +45,7 @@ def merge(merge_steps: Iterable[Any], name: str = None) -> TransformMeta:
 
 
 def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_name):
-    class Merged(Transform):
+    class Merged(Transform, metaclass=CombinatorMeta):
         nonlocal merge_steps, merge_input_tags, merge_output_tags, merge_name
         __creation_values__ = (
             _create_merge_class,
