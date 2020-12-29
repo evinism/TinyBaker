@@ -78,7 +78,6 @@ class FileRef:
     def _open_helper(self, bin=False):
         self.touch()
 
-        # TODO: Get a bunch of shit done.
         if self._get_protocol() == "data":
             data = b64decode(self.path.split("://")[1])
             if self._write:
