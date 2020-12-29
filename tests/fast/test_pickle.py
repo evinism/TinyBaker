@@ -1,6 +1,4 @@
 from tinybaker import Transform, InputTag, OutputTag, sequence
-
-# from tinybaker.workarounds.handprint import Handprint
 import pickle
 
 
