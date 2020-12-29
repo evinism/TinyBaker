@@ -17,7 +17,7 @@ Since transforms aren't normally considered a first-order concept, they get wild
 
 ## The Solution
 
-Tinybaker turns transforms into a first-order concept.
+Tinybaker turns file-to-file transforms into a first-order concept.
 
 TinyBaker transforms can be configured, run, composed, hosted, and tested, all independently from their specific implementations.
 
