@@ -1,15 +1,27 @@
-# TinyBaker: Lightweight tool for defining composable file-to-file transformations
+# TinyBaker: Composable, first-order file-to-file transformations in Python
 ![Python Package](https://github.com/evinism/tinybaker/workflows/Python%20package/badge.svg)
 
-*TinyBaker is still in beta. Take care when using it for production workloads.*
+*TinyBaker is in beta release.*
 
-TinyBaker allows programmers to define file-to-file transformations in a concise format and compose them together with clarity. 
+TinyBaker allows programmers to define first-order file-to-file transformations in a concise format and compose them together with clarity. 
 
 Installation via `pip install tinybaker`
 
 ![TinyBaker Logo](_static/logo.png)
 
-## The model
+## The Problem
+
+Many programs can be considered transformations between source and destination files. Training machine learning models, running predictions on dataframes, processing logs, concatenation, compilation, and many others, are examples of tasks that fundamentally pose a transformation from one set of files to another.
+
+Since transforms aren't normally considered a first-order concept, they get wildly unwieldy to work with. Production workloads are configured separately from local transformations. Getting a local script working on production often requires lots of rework, mocking, testing, and iteration by a product team.
+
+## The Solution
+
+Tinybaker turns transforms into a first-order concept.
+
+TinyBaker transforms can be configured, run, composed, hosted, and tested, all independently from their specific implementations.
+
+## The Model
 
 The main component of TinyBaker is the base class `Transform`: a standalone mapping from one set of files to another.
 
@@ -183,45 +195,6 @@ if __name__ == "__main__":
   cli(SampleTransform)
 ```
 
-### CLI
-TinyBaker can instantly turn a transform into a CLI:
-
-```py
-from tinybaker import Transform, cli
-
-class MNISTPipeline(Transform):
-  # as defined in tests/slow/test_real_world.py
-  # [...]
-
-if __name__ == "__main__":
-  cli(MNISTPipeline)
-```
-
-The above would yield the below when run:
-
-```
-$ python ./mnist_pipeline_transform.py --help
-usage: test_real_world.py [-h] --raw_train_images RAW_TRAIN_IMAGES --raw_test_images
-                          RAW_TEST_IMAGES --accuracy ACCURACY --model MODEL
-                          [--version] [--overwrite]
-
-Execute a MNISTPipeline transform
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --raw_train_images RAW_TRAIN_IMAGES
-                        Path for output tag raw_train_images
-  --raw_test_images RAW_TEST_IMAGES
-                        Path for output tag raw_test_images
-  --accuracy ACCURACY   Path for output tag accuracy
-  --model MODEL         Path for output tag model
-  --version             show program's version number and exit
-  --overwrite           Whether to overwrite any existing output files
-```
-
-No need to write argument parsers -- TinyBaker knows what arguments the transform needs and 
-builds a CLI around it.
-
 ### Operating over multiple filesystems
 Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
 
@@ -301,6 +274,46 @@ MappedStep = map_tags(
   input_mapping={"old_input_name": "new_input_name"},
   output_mapping={"old_output_name": "new_output_name"})
 ```
+
+## CLI
+TinyBaker can instantly turn a transform into a CLI:
+
+```py
+from tinybaker import Transform, cli
+
+class MNISTPipeline(Transform):
+  # as defined in tests/slow/test_real_world.py
+  # [...]
+
+if __name__ == "__main__":
+  cli(MNISTPipeline)
+```
+
+The above would yield the below when run:
+
+```
+$ python ./mnist_pipeline_transform.py --help
+usage: test_real_world.py [-h] --raw_train_images RAW_TRAIN_IMAGES --raw_test_images
+                          RAW_TEST_IMAGES --accuracy ACCURACY --model MODEL
+                          [--version] [--overwrite]
+
+Execute a MNISTPipeline transform
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --raw_train_images RAW_TRAIN_IMAGES
+                        Path for output tag raw_train_images
+  --raw_test_images RAW_TEST_IMAGES
+                        Path for output tag raw_test_images
+  --accuracy ACCURACY   Path for output tag accuracy
+  --model MODEL         Path for output tag model
+  --version             show program's version number and exit
+  --overwrite           Whether to overwrite any existing output files
+```
+
+No need to write argument parsers -- TinyBaker knows what arguments the transform needs and 
+builds a CLI around it.
+
 
 ## Filesets
 
