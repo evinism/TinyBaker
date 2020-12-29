@@ -49,6 +49,32 @@ class FileRef:
             if should_close:
                 filesystem.close()
 
+    def open(self) -> TextIOWrapper:
+        """
+        Open the FileRef for use with textual data
+
+        :return: The stream object for interacting with the FileRef
+        """
+        return self._open_helper()
+
+    def openbin(self) -> Union[BufferedWriter, BufferedReader]:
+        """
+        Open the FileRef for use with binary data
+
+        :return: The stream for interacting with the FileRef
+        """
+        return self._open_helper(True)
+
+    def touch(self):
+        """
+        Mark the FileRef as being opened, without actually opening it.
+
+        This is useful if you want to perform some operation on a fileref
+        outside of TinyBaker's file abstractions, e.g. `tag.touch()`,
+        followed by `make_some_app_specific_mutation_on(tag.path)`
+        """
+        self.opened = True
+
     def _open_helper(self, bin=False):
         self.touch()
 
@@ -75,32 +101,6 @@ class FileRef:
         finally:
             if should_close:
                 filesystem.close()
-
-    def open(self) -> TextIOWrapper:
-        """
-        Open the FileRef for use with textual data
-
-        :return: The stream object for interacting with the FileRef
-        """
-        return self._open_helper()
-
-    def openbin(self) -> Union[BufferedWriter, BufferedReader]:
-        """
-        Open the FileRef for use with binary data
-
-        :return: The stream for interacting with the FileRef
-        """
-        return self._open_helper(True)
-
-    def touch(self):
-        """
-        Mark the FileRef as being opened, without actually opening it.
-
-        This is useful if you want to perform some operation on a fileref
-        outside of TinyBaker's file abstractions, e.g. `tag.touch()`,
-        followed by `make_some_app_specific_mutation_on(tag.path)`
-        """
-        self.opened = True
 
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url
