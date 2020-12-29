@@ -3,6 +3,7 @@ from fs.tempfs import TempFS
 from fs.osfs import OSFS
 from .exceptions import BakerError
 from .workarounds import is_fileset
+from .parallel import run_parallel
 
 
 class RunInfo:
@@ -63,6 +64,9 @@ class BakerContext:
         run_info = RunInfo()
         with run_info:
             transform._exec_with_run_info(run_info)
+
+    def run_parallel(self, instances, run_info):
+        return run_parallel(instances, self, run_info)
 
 
 _default_context = BakerContext()

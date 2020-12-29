@@ -2,7 +2,6 @@ from typing import List, Iterable, Any
 from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..exceptions import BakerError, TagConflictError
 from ..util import classproperty
-from ..parallel import run_parallel
 from typeguard import typechecked
 from .combinatormeta import CombinatorMeta
 
@@ -88,6 +87,6 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
                         overwrite=self.overwrite,
                     )
                 )
-            run_parallel(instances, self.context, self._current_run_info)
+            self.context.run_parallel(instances, self._current_run_info)
 
     return Merged
