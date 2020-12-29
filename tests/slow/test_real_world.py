@@ -108,7 +108,9 @@ Pipeline = sequence(
 
 
 def test_real_world():
-    Pipeline(
+    # Try pickling and unpickling first -- ensure these things work.
+    PickledPipeline = pickle.loads(pickle.dumps(Pipeline))
+    PickledPipeline(
         input_paths={
             "raw_train_images": "./tests/__data__/mnist/optdigits.tra",
             "raw_test_images": "./tests/__data__/mnist/optdigits.tes",

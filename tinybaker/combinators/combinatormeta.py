@@ -1,16 +1,11 @@
 from ..transform import TransformMeta
-from ..workarounds.handprint import Handprint
 import copyreg
 
 
 class CombinatorMeta(TransformMeta):
     @staticmethod
-    def produce(hp):
-        return hp.produce()
-
-    @staticmethod
-    def reduce(c):
-        return (CombinatorMeta.produce, (Handprint(c),))
+    def reduce(cls):
+        return (cls.__creation_values__[0], cls.__creation_values__[1:])
 
 
 copyreg.pickle(CombinatorMeta, CombinatorMeta.reduce)

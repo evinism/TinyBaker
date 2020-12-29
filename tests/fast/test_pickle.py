@@ -1,5 +1,6 @@
 from tinybaker import Transform, InputTag, OutputTag, sequence
-from tinybaker.workarounds.handprint import Handprint
+
+# from tinybaker.workarounds.handprint import Handprint
 import pickle
 
 
@@ -42,41 +43,7 @@ class StepThree(Transform):
 BaseSeq = sequence([StepOne, sequence([StepTwo, StepThree])])
 
 
-def test_to_and_from_handprint_no_pickle():
-    Seq = Handprint(BaseSeq).produce()
-
-    Seq(
-        input_paths={
-            "foo": "./tests/__data__/foo.txt",
-            "bleep": "./tests/__data__/bleep.txt",
-        },
-        output_paths={"boppo": "/tmp/boppo"},
-        overwrite=True,
-    ).run()
-
-    with open("/tmp/boppo", "r") as f:
-        assert f.read() == "foo contents processed bleep contents"
-
-
-def test_to_and_from_handprint_pickle():
-    hp = Handprint(BaseSeq)
-    hp2 = pickle.loads(pickle.dumps(hp))
-    Seq = hp2.produce()
-
-    Seq(
-        input_paths={
-            "foo": "./tests/__data__/foo.txt",
-            "bleep": "./tests/__data__/bleep.txt",
-        },
-        output_paths={"boppo": "/tmp/boppo"},
-        overwrite=True,
-    ).run()
-
-    with open("/tmp/boppo", "r") as f:
-        assert f.read() == "foo contents processed bleep contents"
-
-
-def test_bare_pickle():
+def test_pickle_nested_sequence():
     Seq = pickle.loads(pickle.dumps(BaseSeq))
 
     Seq(
