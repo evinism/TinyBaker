@@ -94,9 +94,8 @@ class FileRef:
                 mode = mode + "r"
             if self._write:
                 mode = mode + "w"
-            if bin:
-                return filesystem.openbin(resource, mode)
-            return filesystem.open(resource, mode)
+            method = filesystem.openbin if bin else filesystem.open
+            return method(resource, mode)
         finally:
             if should_close:
                 filesystem.close()
