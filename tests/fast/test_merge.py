@@ -116,7 +116,7 @@ def test_conflicting_inputs():
     Merged.output_tags = {"bar", "baz"}
 
 
-def test_multithreaded_merge():
+def test_multiprocessed_merge():
     class StepOne(Transform):
         input_tags = {"foo"}
         output_tags = {"bar"}
@@ -138,7 +138,9 @@ def test_multithreaded_merge():
         },
         output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
         overwrite=True,
-        context=BakerContext(parallel_mode="multithreading"),
+        context=BakerContext(
+            parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
+        ),
     ).run()
 
     with open("/tmp/bar", "r") as f:
