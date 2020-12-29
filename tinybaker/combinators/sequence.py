@@ -11,7 +11,7 @@ from ..exceptions import (
 from ..util import classproperty
 from ..workarounds import is_fileset
 from typeguard import typechecked
-from .combinatormeta import CombinatorMeta
+from .base import CombinatorBase
 
 
 @typechecked
@@ -63,7 +63,7 @@ def _determine_sequence_interface(scope_diagram, exposed_intermediates):
 
 
 def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
-    class Sequence(Transform, metaclass=CombinatorMeta):
+    class Sequence(CombinatorBase):
         nonlocal seq_input_tags, seq_output_tags, seq_steps, seq_name
         # Hack to ensure we can pickle / unpickle these dynamic classes
         __creation_values__ = (

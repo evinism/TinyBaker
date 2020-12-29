@@ -9,13 +9,14 @@ from .exceptions import (
     BakerError,
     SeriousErrorThatYouShouldOpenAnIssueForIfYouGet,
     ConfigurationError,
+    UnusedFileWarning,
 )
 from .context import BakerContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 from .namespace_transforms import namespace_to_transform, dict_to_transform
 from .tag import InputTag, OutputTag, input_files_ctx, output_files_ctx
-
+from warnings import warn
 
 PathDict = Dict[str, Union[str, Iterable[str]]]
 FileDict = Dict[str, Union[FileRef, List[FileRef]]]
@@ -241,9 +242,30 @@ class Transform(metaclass=TransformMeta):
                     "No current run information, somehow!"
                 )
             self.script()
+            self._warn_if_files_untouched()
         finally:
             input_files_ctx.reset(input_token)
             output_files_ctx.reset(output_token)
+
+    # Only for leaf nodes!!
+    def _warn_if_files_untouched(self):
+        refs: List[FileRef] = []
+
+        def add_refs(ref_dict: Dict[str, FileRef]) -> None:
+            for tag in ref_dict:
+                if is_fileset(tag):
+                    refs.extend([(tag, ref) for ref in ref_dict[tag]])
+                else:
+                    refs.append((tag, ref_dict[tag]))
+
+        add_refs(self.input_files)
+        add_refs(self.output_files)
+        for tag, ref in refs:
+            if not ref.opened:
+                warn(
+                    "Unused file for tag {}: {}".format(tag, ref.path),
+                    UnusedFileWarning,
+                )
 
     @abstractmethod
     def script(self):

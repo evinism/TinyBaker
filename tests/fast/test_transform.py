@@ -1,6 +1,6 @@
 import pytest
 from tinybaker import Transform, InputTag, OutputTag
-from tinybaker.exceptions import FileSetError, BakerError
+from tinybaker.exceptions import FileSetError, BakerError, UnusedFileWarning
 
 
 def test_validate_paths():
@@ -66,11 +66,59 @@ def test_touch_functions():
             assert self.foo.ref.opened == True
             assert self.baz.ref.opened == True
 
-    BasicStep(
-        input_paths={"foo": "./tests/__data__/foo.txt"},
-        output_paths={"baz": "./tests/__data__/baz.txt"},
-        overwrite=True,
-    ).run()
+    with pytest.warns(None) as record:
+        BasicStep(
+            input_paths={"foo": "./tests/__data__/foo.txt"},
+            output_paths={"baz": "./tests/__data__/baz.txt"},
+            overwrite=True,
+        ).run()
+    assert not record
+
+
+def test_failing_to_open_warns():
+    class One(Transform):
+        foo = InputTag("foo")
+        baz = OutputTag("baz")
+
+        def script(self):
+            pass
+
+    class Two(Transform):
+        foo = InputTag("foo")
+        baz = OutputTag("baz")
+
+        def script(self):
+            self.foo.touch()
+            pass
+
+    class Three(Transform):
+        foo = InputTag("foo")
+        baz = OutputTag("baz")
+
+        def script(self):
+            self.baz.touch()
+            pass
+
+    with pytest.warns(UnusedFileWarning):
+        One(
+            input_paths={"foo": "./tests/__data__/foo.txt"},
+            output_paths={"baz": "./tests/__data__/baz.txt"},
+            overwrite=True,
+        ).run()
+
+    with pytest.warns(UnusedFileWarning):
+        Two(
+            input_paths={"foo": "./tests/__data__/foo.txt"},
+            output_paths={"baz": "./tests/__data__/baz.txt"},
+            overwrite=True,
+        ).run()
+
+    with pytest.warns(UnusedFileWarning):
+        Three(
+            input_paths={"foo": "./tests/__data__/foo.txt"},
+            output_paths={"baz": "./tests/__data__/baz.txt"},
+            overwrite=True,
+        ).run()
 
 
 def test_fails_with_missing_paths():

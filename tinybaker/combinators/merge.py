@@ -3,7 +3,7 @@ from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..exceptions import BakerError, TagConflictError
 from ..util import classproperty
 from typeguard import typechecked
-from .combinatormeta import CombinatorMeta
+from .base import CombinatorBase
 
 
 @typechecked
@@ -29,7 +29,7 @@ def merge(merge_steps: Iterable[Any], name: str = None) -> TransformMeta:
 
 
 def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_name):
-    class Merged(Transform, metaclass=CombinatorMeta):
+    class Merged(CombinatorBase):
         nonlocal merge_steps, merge_input_tags, merge_output_tags, merge_name
         __creation_values__ = (
             _create_merge_class,
