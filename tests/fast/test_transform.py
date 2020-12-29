@@ -55,6 +55,24 @@ def test_opens_local_paths():
     ).run()
 
 
+def test_touch_functions():
+    class BasicStep(Transform):
+        foo = InputTag("foo")
+        baz = OutputTag("baz")
+
+        def script(self):
+            self.foo.touch()
+            self.baz.touch()
+            assert self.foo.ref.opened == True
+            assert self.baz.ref.opened == True
+
+    BasicStep(
+        input_paths={"foo": "./tests/__data__/foo.txt"},
+        output_paths={"baz": "./tests/__data__/baz.txt"},
+        overwrite=True,
+    ).run()
+
+
 def test_fails_with_missing_paths():
     class BasicStep(Transform):
         foo = InputTag("foo")

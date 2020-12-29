@@ -44,6 +44,10 @@ class BaseTag:
     def exists(self, *args, **kwargs):
         return self.ref.exists(*args, **kwargs)
 
+    @only_for_annotation("file")
+    def touch(self):
+        self.ref.touch()
+
     @property
     @only_for_annotation("file")
     def path(self):
