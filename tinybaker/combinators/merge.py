@@ -3,9 +3,14 @@ from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..exceptions import BakerError, TagConflictError
 from ..util import classproperty
 from threading import Thread
+from multiprocessing import Pool
 from queue import Queue
 from typeguard import typechecked
 from .combinatormeta import CombinatorMeta
+
+
+def _mp_run(instance, current_run_info):
+    return instance._exec_with_run_info(current_run_info)
 
 
 class MergeWorker(Thread):
@@ -114,6 +119,12 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
                 for instance in instances:
                     queue.put((instance, self._current_run_info))
                 queue.join()
+            elif self.context.parallel_mode == "multiprocessing":
+                with Pool(min(len(instances), self.context.max_processes)) as p:
+                    mp_args = (
+                        (instance, self._current_run_info) for instance in instances
+                    )
+                    p.map(_mp_run, mp_args)
             else:
                 for instance in instances:
                     instance._exec_with_run_info(self._current_run_info)

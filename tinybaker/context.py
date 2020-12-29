@@ -25,15 +25,20 @@ class BakerContext:
         Which filesystem to use to store intermediates. You probably want this to be "temp" or "mem"
     :param optional max_threads: The max number of threads that TinyBaker can spawn.
     :param optional parallel_mode:
-        What parallelism mode to run TinyBaker in. Options are None and "multithreading". These
-        will probably expand over time.
+        What parallelism mode to run TinyBaker in. Options are None, "multiprocessing", and
+        "multithreading". These will probably expand over time.
     """
 
     def __init__(
-        self, fs_for_intermediates="temp", max_threads=8, parallel_mode="multithreading"
+        self,
+        fs_for_intermediates="temp",
+        max_threads=8,
+        max_processes=8,
+        parallel_mode="multiprocessing",
     ):
         self.fs_for_intermediates = fs_for_intermediates
         self.max_threads = max_threads
+        self.max_processes = max_processes
         self.parallel_mode = parallel_mode
 
     def run_transform(self, transform):
