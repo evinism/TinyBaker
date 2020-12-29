@@ -4,6 +4,7 @@ from fs.opener.parse import parse_fs_url
 from .exceptions import SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
 from io import BufferedWriter, BufferedReader, TextIOWrapper, StringIO, BytesIO
 from base64 import b64decode
+from .exceptions import BakerError
 
 
 def get_fname(path):
