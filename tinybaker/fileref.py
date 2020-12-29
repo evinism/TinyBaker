@@ -42,47 +42,12 @@ class FileRef:
         if self._get_protocol() == "data":
             return True
 
-        filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
-        if filesystem:
-            with filesystem:
-                return filesystem.exists(resource)
-        return previously_opened_filesystem.exists(resource)
-
-    def _open_helper(self, bin=False):
-        self.touch()
-
-        # TODO: Get a bunch of shit done.
-        if self._get_protocol() == "data":
-            data = b64decode(self.path.split("://")[1])
-            if self._write:
-                raise BakerError("Cannot write to data protocol")
-            if bin:
-                return BytesIO(initial_bytes=data)
-            else:
-                return StringIO(initial_value=data.decode("utf-8"))
-
-        # TERRIBLE AND UGLY
-        filesystem, previously_opened_filesystem, resource = self._get_fs_and_path()
-        if filesystem:
-            with filesystem:
-                mode = ""
-                if self._read:
-                    mode = mode + "r"
-                if self._write:
-                    mode = mode + "w"
-                if bin:
-                    return filesystem.openbin(resource, mode)
-                return filesystem.open(resource, mode)
-
-        else:
-            mode = ""
-            if self._read:
-                mode = mode + "r"
-            if self._write:
-                mode = mode + "w"
-            if bin:
-                return previously_opened_filesystem.openbin(resource, mode)
-            return previously_opened_filesystem.open(resource, mode)
+        filesystem, resource, should_close = self._get_fs_and_path()
+        try:
+            return filesystem.exists(resource)
+        finally:
+            if should_close:
+                filesystem.close()
 
     def open(self) -> TextIOWrapper:
         """
@@ -110,17 +75,47 @@ class FileRef:
         """
         self.opened = True
 
+    def _open_helper(self, bin=False):
+        self.touch()
+
+        if self._get_protocol() == "data":
+            data = b64decode(self.path.split("://")[1])
+            if self._write:
+                raise BakerError("Cannot write to data protocol")
+            if bin:
+                return BytesIO(initial_bytes=data)
+            else:
+                return StringIO(initial_value=data.decode("utf-8"))
+
+        filesystem, resource, should_close = self._get_fs_and_path()
+        try:
+            mode = ""
+            if self._read:
+                mode = mode + "r"
+            if self._write:
+                mode = mode + "w"
+            method = filesystem.openbin if bin else filesystem.open
+            return method(resource, mode)
+        finally:
+            if should_close:
+                filesystem.close()
+
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url
         protocol = self._get_protocol()
         if protocol in self.run_info.open_fses:
-            # So we see if it's got an appropriate url before trying:
+            # pre-opened case
             parsed = parse_fs_url(self.path)
-            return (None, self.run_info.open_fses[protocol], parsed.resource)
-
-        fname = get_fname(self.path)
-        truncated_path = get_truncated_path(self.path, fname)
-        return (open_fs(truncated_path), None, fname)
+            fs = self.run_info.open_fses[protocol]
+            fname = parsed.resource
+            should_close = False
+        else:
+            # self-managed case
+            fname = get_fname(self.path)
+            truncated_path = get_truncated_path(self.path, fname)
+            fs = open_fs(truncated_path)
+            should_close = True
+        return (fs, fname, should_close)
 
     def _get_protocol(self):
         return self.path.split("://")[0]
