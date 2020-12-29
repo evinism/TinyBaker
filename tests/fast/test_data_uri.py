@@ -53,12 +53,12 @@ def test_data_binary():
         def script(self):
             with self.foo.openbin() as f:
                 data = load(f)
-            assert data == {"hi": str, "bye": [int]}
+            assert data == {"hi": str, "bye": [int, test_data_binary]}
             with self.bar.open() as f:
                 f.write("success")
 
     bar_path = "/tmp/datauri"
-    obj = {"hi": str, "bye": [int]}
+    obj = {"hi": str, "bye": [int, test_data_binary]}
 
     uri_data = b64encode(dumps(obj))
     T(
