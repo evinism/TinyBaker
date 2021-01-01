@@ -42,21 +42,23 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
         input_tags = merge_input_tags
         output_tags = merge_output_tags
 
-        steps = merge_steps
+        parallelism = len(merge_steps)
+
+        substeps = merge_steps
         _name = merge_name
 
         @classmethod
         def structure(cls):
             struct = super(Merged, cls).structure()
             struct["type"] = "merge"
-            struct["steps"] = [step.structure() for step in cls.steps]
+            struct["steps"] = [step.structure() for step in cls.substeps]
             return struct
 
         @classproperty
         def name(cls):
             if cls._name:
                 return cls._name
-            return "Merge({})".format(",".join([step.name for step in cls.steps]))
+            return "Merge({})".format(",".join([step.name for step in cls.substeps]))
 
         def script(self):
             merge_input_paths = {
@@ -68,7 +70,7 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
 
             instances = []
 
-            for step in self.steps:
+            for step in self.substeps:
                 input_files = {
                     tag: merge_input_paths[tag]
                     for tag in merge_input_paths

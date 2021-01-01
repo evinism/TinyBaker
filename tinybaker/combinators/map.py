@@ -1,5 +1,5 @@
 from typing import Set, Dict, Any
-from ..exceptions import BakerError
+from ..exceptions import BakerError, SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
 from ..transform import Transform, TransformMeta, coerce_to_transform
 from ..fileref import FileRef
 from ..util import classproperty
@@ -104,7 +104,7 @@ def _create_tag_class(
         output_tags = mapping_output_tags
         _name = nonlocal_name
 
-        _base_step = base_step
+        substeps = [base_step]
         _input_mapping = input_mapping
         _output_mapping = output_mapping
 
@@ -112,7 +112,7 @@ def _create_tag_class(
         def structure(cls):
             struct = super(TagMapping, cls).structure()
             struct["type"] = "map"
-            struct["base_step"] = cls._base_step.structure()
+            struct["base_step"] = cls._get_base_step().structure()
             return struct
 
         @classproperty
@@ -121,6 +121,14 @@ def _create_tag_class(
                 return self._name
             return base_step.name
 
+        @classmethod
+        def _get_base_step(cls):
+            if len(cls.substeps) != 1:
+                raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
+                    "Somehow map has more than one substep"
+                )
+            return cls.substeps[0]
+
         def script(self):
             input_paths = _map_filerefs_to_new_paths(
                 self.input_files, _invert_mapping(self._input_mapping)
@@ -128,8 +136,8 @@ def _create_tag_class(
             output_paths = _map_filerefs_to_new_paths(
                 self.output_files, _invert_mapping(self._output_mapping)
             )
-
-            self._base_step(
+            base_step = self._get_base_step()
+            base_step(
                 input_paths=input_paths,
                 output_paths=output_paths,
                 context=self.context,
