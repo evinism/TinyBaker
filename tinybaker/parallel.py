@@ -4,11 +4,6 @@ from multiprocessing import Pool
 from queue import Queue
 
 
-def _mp_run(arg):
-    instance, current_run_info = arg
-    return instance._exec_with_run_info(current_run_info)
-
-
 class ParalellizerBase(ABC):
     @abstractmethod
     def run_parallel(self, context, instances, current_run_info):
@@ -45,10 +40,15 @@ class ThreadParallelizer(ParalellizerBase):
 
 
 class ProcessParallelizer(ParalellizerBase):
+    @staticmethod
+    def _mp_run(arg):
+        instance, current_run_info = arg
+        return instance._exec_with_run_info(current_run_info)
+
     def run_parallel(self, context, instances, current_run_info):
         with Pool(min(len(instances), context.max_processes)) as p:
             mp_args = [(instance, current_run_info) for instance in instances]
-            p.map(_mp_run, mp_args)
+            p.map(self._mp_run, mp_args)
 
 
 class NonParallelizer(ParalellizerBase):
