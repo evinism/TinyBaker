@@ -47,7 +47,6 @@ class RunInfo:
         return (RunInfo, (self.baker_config,))
 
 
-# TODO: This should probably exist only in the driver side.
 class BakerDriver:
     """
     Driver Context for running TinyBaker transforms
@@ -77,10 +76,13 @@ class BakerDriver:
             fs_for_intermediates, parallel_mode, max_threads, max_processes
         )
 
-    def run_transform(self, transform):
+    def run(self, transform):
         run_info = RunInfo(self.baker_config)
         with run_info:
             transform._exec_with_run_info(run_info)
+
+    def __reduce__(self):
+        raise NotImplementedError("Should not serialize and share driver object!")
 
 
 _default_context = BakerDriver()

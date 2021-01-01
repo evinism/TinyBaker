@@ -90,7 +90,7 @@ def test_in_memory_intermediates():
 
     Seq = sequence([StepOne, StepTwo, StepThree])
 
-    in_memory_context.run_transform(
+    in_memory_context.run(
         Seq(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",

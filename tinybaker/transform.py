@@ -227,7 +227,7 @@ class Transform(metaclass=TransformMeta):
 
     def run(self):
         """Run the transform instance in the default context"""
-        get_default_context().run_transform(self)
+        get_default_context().run(self)
 
     def _exec_with_run_info(self, run_info):
         # Set

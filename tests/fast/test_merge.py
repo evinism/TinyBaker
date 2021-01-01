@@ -138,7 +138,7 @@ def test_multiprocessed_merge():
 
     BakerDriver(
         parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
-    ).run_transform(
+    ).run(
         Merged(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",
@@ -171,7 +171,7 @@ def test_not_parallel_merge():
 
     Merged = merge([StepOne, StepTwo])
 
-    BakerDriver(parallel_mode=None).run_transform(
+    BakerDriver(parallel_mode=None).run(
         Merged(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",
