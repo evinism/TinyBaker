@@ -11,7 +11,7 @@ from .exceptions import (
     ConfigurationError,
     UnusedFileWarning,
 )
-from .context import BakerContext, get_default_context
+from .context import BakerDriver, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 from .namespace_transforms import namespace_to_transform, dict_to_transform
@@ -44,7 +44,7 @@ class Transform(metaclass=TransformMeta):
 
     :param input_paths: Dictionary of input tags to files.
     :param output_paths: Dictionary of output tags to files.
-    :param optional context: The BakerContext to use for this transformation
+    :param optional context: The BakerDriver to use for this transformation
     :param optional overwrite: Whether or not to configure the transformation to overwrite output files on execution
     """
 
@@ -76,7 +76,6 @@ class Transform(metaclass=TransformMeta):
         self,
         input_paths: PathDict,
         output_paths: PathDict,
-        context: BakerContext = get_default_context(),
         overwrite: bool = False,
     ):
         _ensure_fileset_iff_fileset_tag(input_paths)
@@ -87,7 +86,6 @@ class Transform(metaclass=TransformMeta):
 
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
-        self.context = context
         self.overwrite = overwrite
         self._current_run_info = None
 
@@ -228,8 +226,8 @@ class Transform(metaclass=TransformMeta):
         return cls.__name__
 
     def run(self):
-        """Run the transform instance"""
-        self.context.run_transform(self)
+        """Run the transform instance in the default context"""
+        get_default_context().run_transform(self)
 
     def _exec_with_run_info(self, run_info):
         # Set

@@ -140,7 +140,6 @@ def _create_tag_class(
             base_step(
                 input_paths=input_paths,
                 output_paths=output_paths,
-                context=self.context,
                 overwrite=self.overwrite,
             )._exec_with_run_info(self._current_run_info)
 

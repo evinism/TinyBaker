@@ -1,6 +1,6 @@
 import pytest
 from tinybaker import sequence, Transform, InputTag, OutputTag
-from tinybaker.context import BakerContext
+from tinybaker.context import BakerDriver
 
 
 def test_sequence():
@@ -53,7 +53,7 @@ def test_sequence():
 
 
 def test_in_memory_intermediates():
-    in_memory_context = BakerContext(fs_for_intermediates="mem")
+    in_memory_context = BakerDriver(fs_for_intermediates="mem")
 
     class StepOne(Transform):
         foo = InputTag("foo")
@@ -90,15 +90,16 @@ def test_in_memory_intermediates():
 
     Seq = sequence([StepOne, StepTwo, StepThree])
 
-    Seq(
-        input_paths={
-            "foo": "./tests/__data__/foo.txt",
-            "bleep": "./tests/__data__/bleep.txt",
-        },
-        output_paths={"boppo": "/tmp/boppo"},
-        context=in_memory_context,
-        overwrite=True,
-    ).run()
+    in_memory_context.run_transform(
+        Seq(
+            input_paths={
+                "foo": "./tests/__data__/foo.txt",
+                "bleep": "./tests/__data__/bleep.txt",
+            },
+            output_paths={"boppo": "/tmp/boppo"},
+            overwrite=True,
+        )
+    )
 
     with open("/tmp/boppo", "r") as f:
         assert f.read() == "foo contents processed bleep contents"

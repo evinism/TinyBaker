@@ -80,7 +80,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
         _name = seq_name
 
         def _generate_temp_filename(self, sid):
-            target_fs = self.context.fs_for_intermediates
+            target_fs = self._current_run_info.baker_config.fs_for_intermediates
             return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
 
         @classmethod
@@ -148,7 +148,6 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
                     step(
                         input_paths=input_paths,
                         output_paths=output_paths,
-                        context=self.context,
                         overwrite=self.overwrite,
                     )
                 )
