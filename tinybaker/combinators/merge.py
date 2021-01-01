@@ -88,6 +88,6 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
                         overwrite=self.overwrite,
                     )
                 )
-            self._current_run_info.run_parallel(instances, self._current_run_info)
+            self._current_run_info.execute(instances)
 
     return Merged

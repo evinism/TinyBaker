@@ -21,7 +21,7 @@ class CombinatorBase(Transform, metaclass=CombinatorMeta):
 
     @classproperty
     def parallelism(cls):
-        max_parallelism = 1
+        max_parallelism = 0
         for step in cls.substeps:
             if step.parallelism > max_parallelism:
                 max_parallelism = step.parallelism

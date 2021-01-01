@@ -12,7 +12,7 @@ BakerConfig = namedtuple(
 )
 
 
-class RunInfo:
+class BakerWorkerContext:
     def __init__(self, baker_config: BakerConfig):
         self.open_fses = {}
         self.baker_config = baker_config
@@ -29,7 +29,11 @@ class RunInfo:
             fs = self.open_fses[prefix]
             fs.close()
 
-    def run_parallel(self, instances, run_info):
+    def execute(self, instances):
+        if len(instances) == 1:
+            # If there's only one item, run it in the current thread.
+            return NonParallelizer().run_parallel(instances, self)
+
         parallel_mode = self.baker_config.parallel_mode
         # TODO: Make the parallelizer live longer-term than just within this call
         if parallel_mode == "multiprocessing":
@@ -38,13 +42,11 @@ class RunInfo:
             par = ThreadParallelizer()
         else:
             par = NonParallelizer()
-        return par.run_parallel(instances, run_info)
+        return par.run_parallel(instances, self)
 
-    # This defines what's shared between processes. Right now, the
-    # answer is "nothing", which we can get away with due to requiring
-    # nvtemp:// for multiprocessing.
+    # This defines what's shared between processes.
     def __reduce__(self):
-        return (RunInfo, (self.baker_config,))
+        return (BakerWorkerContext, (self.baker_config,))
 
 
 class BakerDriver:
@@ -77,9 +79,9 @@ class BakerDriver:
         )
 
     def run(self, transform):
-        run_info = RunInfo(self.baker_config)
+        run_info = BakerWorkerContext(self.baker_config)
         with run_info:
-            transform._exec_with_run_info(run_info)
+            run_info.execute([transform])
 
     def __reduce__(self):
         raise NotImplementedError("Should not serialize and share driver object!")
