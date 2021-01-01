@@ -76,7 +76,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
 
         input_tags = seq_input_tags
         output_tags = seq_output_tags
-        steps = seq_steps
+        substeps = seq_steps
         _name = seq_name
 
         def _generate_temp_filename(self, sid):
@@ -87,14 +87,14 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
         def structure(cls):
             struct = super(Sequence, cls).structure()
             struct["type"] = "sequence"
-            struct["steps"] = [step.structure() for step in cls.steps]
+            struct["steps"] = [step.structure() for step in cls.substeps]
             return struct
 
         @classproperty
         def name(cls):
             if cls._name:
                 return cls._name
-            return "Seq({})".format(",".join([step.name for step in cls.steps]))
+            return "Seq({})".format(",".join([step.name for step in cls.substeps]))
 
         def script(self):
             sequence_instance_id = uuid4()
@@ -109,7 +109,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
             }
 
             lexical_scope = {}
-            for step in self.steps:
+            for step in self.substeps:
                 # Step input files
                 input_paths_from_sequence = {
                     tag: seq_input_paths[tag]

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from ..transform import Transform, TransformMeta
 import copyreg
 
@@ -12,6 +13,11 @@ copyreg.pickle(CombinatorMeta, CombinatorMeta.reduce)
 
 
 class CombinatorBase(Transform, metaclass=CombinatorMeta):
+    @property
+    @abstractmethod
+    def substeps(self):
+        pass
+
     # TODO: Clean this up by propagating touches to higher levels
     def _warn_if_files_untouched(self):
         pass
