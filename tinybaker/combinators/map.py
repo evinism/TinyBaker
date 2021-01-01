@@ -141,6 +141,6 @@ def _create_tag_class(
                 input_paths=input_paths,
                 output_paths=output_paths,
                 overwrite=self.overwrite,
-            )._exec_with_run_info(self._current_run_info)
+            )._exec_with_worker_context(self._current_worker_context)
 
     return TagMapping

@@ -79,9 +79,9 @@ class BakerDriver:
         )
 
     def run(self, transform):
-        run_info = BakerWorkerContext(self.baker_config)
-        with run_info:
-            run_info.execute([transform])
+        worker_context = BakerWorkerContext(self.baker_config)
+        with worker_context:
+            worker_context.execute([transform])
 
     def __reduce__(self):
         raise NotImplementedError("Should not serialize and share driver object!")

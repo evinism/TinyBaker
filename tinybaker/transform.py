@@ -87,7 +87,7 @@ class Transform(metaclass=TransformMeta):
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
         self.overwrite = overwrite
-        self._current_run_info = None
+        self._current_worker_context = None
 
     @classproperty
     def input_tags(cls):
@@ -132,7 +132,7 @@ class Transform(metaclass=TransformMeta):
                             individual_path,
                             read_bit=True,
                             write_bit=False,
-                            run_info=self._current_run_info,
+                            worker_context=self._current_worker_context,
                         )
                     )
                 self.input_files[tag] = refset
@@ -141,7 +141,7 @@ class Transform(metaclass=TransformMeta):
                     input_paths[tag],
                     read_bit=True,
                     write_bit=False,
-                    run_info=self._current_run_info,
+                    worker_context=self._current_worker_context,
                 )
 
         for tag in output_paths:
@@ -153,7 +153,7 @@ class Transform(metaclass=TransformMeta):
                             individual_path,
                             read_bit=False,
                             write_bit=True,
-                            run_info=self._current_run_info,
+                            worker_context=self._current_worker_context,
                         )
                     )
                 self.output_files[tag] = refset
@@ -162,7 +162,7 @@ class Transform(metaclass=TransformMeta):
                     output_paths[tag],
                     read_bit=False,
                     write_bit=True,
-                    run_info=self._current_run_info,
+                    worker_context=self._current_worker_context,
                 )
 
     def _validate_file_existence(self):
@@ -229,17 +229,17 @@ class Transform(metaclass=TransformMeta):
         """Run the transform instance in the default context"""
         get_default_context().run(self)
 
-    def _exec_with_run_info(self, run_info):
+    def _exec_with_worker_context(self, worker_context):
         # Set
         input_token = input_files_ctx.set(self.input_files)
         output_token = output_files_ctx.set(self.output_files)
         try:
-            self._current_run_info = run_info
+            self._current_worker_context = worker_context
             self._init_file_dicts(self.input_paths, self.output_paths)
             self._validate_file_existence()
-            if not run_info:
+            if not worker_context:
                 raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
-                    "No current run information, somehow!"
+                    "No current worker context, somehow!"
                 )
             self.script()
             self._warn_if_files_untouched()

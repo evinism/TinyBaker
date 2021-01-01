@@ -26,12 +26,12 @@ def get_truncated_path(path, fname):
 class FileRef:
     """Represents a reference to a file. TinyBaker generates these for use in the script() function"""
 
-    def __init__(self, path, read_bit, write_bit, run_info):
+    def __init__(self, path, read_bit, write_bit, worker_context):
         self.path = path
         self._read = read_bit
         self._write = write_bit
         self.opened = False
-        self.run_info = run_info
+        self.worker_context = worker_context
 
     def exists(self) -> bool:
         """
@@ -103,10 +103,10 @@ class FileRef:
     def _get_fs_and_path(self):
         # Annoyingly, relative dirs are not parsed well by parse_fs_url
         protocol = self._get_protocol()
-        if protocol in self.run_info.open_fses:
+        if protocol in self.worker_context.open_fses:
             # pre-opened case
             parsed = parse_fs_url(self.path)
-            fs = self.run_info.open_fses[protocol]
+            fs = self.worker_context.open_fses[protocol]
             fname = parsed.resource
             should_close = False
         else:
