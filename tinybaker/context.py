@@ -3,7 +3,7 @@ from fs.tempfs import TempFS
 from fs.osfs import OSFS
 from .exceptions import BakerError
 from .workarounds import is_fileset
-from .parallel import run_parallel
+from .parallel import ProcessParallelizer, ThreadParallelizer, NonParallelizer
 
 
 class RunInfo:
@@ -24,11 +24,12 @@ class RunInfo:
 
     # This defines what's shared between processes. Right now, the
     # answer is "nothing", which we can get away with due to requiring
-    # nvtemp for multiprocessing.
+    # nvtemp:// for multiprocessing.
     def __reduce__(self):
         return (RunInfo, ())
 
 
+# TODO: This should probably exist only in the driver side.
 class BakerContext:
     """
     Execution Context for running TinyBaker transforms
@@ -66,7 +67,14 @@ class BakerContext:
             transform._exec_with_run_info(run_info)
 
     def run_parallel(self, instances, run_info):
-        return run_parallel(instances, self, run_info)
+        # TODO: Make the parallelizer live longer-term than just within this call
+        if self.parallel_mode == "multiprocessing":
+            par = ProcessParallelizer()
+        elif self.parallel_mode == "multithreading":
+            par = ThreadParallelizer()
+        else:
+            par = NonParallelizer()
+        return par.run_parallel(self, instances, run_info)
 
 
 _default_context = BakerContext()
