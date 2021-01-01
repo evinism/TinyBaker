@@ -42,6 +42,8 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
         input_tags = merge_input_tags
         output_tags = merge_output_tags
 
+        parallelism = len(merge_steps)
+
         substeps = merge_steps
         _name = merge_name
 

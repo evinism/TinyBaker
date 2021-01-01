@@ -69,6 +69,8 @@ class Transform(metaclass=TransformMeta):
         """
         return dict_to_transform(Transform, dic)
 
+    parallelism = 1
+
     @typechecked
     def __init__(
         self,

@@ -61,6 +61,8 @@ def test_merge_and_sequence():
 
     Merged = sequence([Id, merge([StepOne, StepTwo])])
 
+    assert Merged.parallelism == 2
+
     Merged(
         input_paths={
             "boppo": "./tests/__data__/foo.txt",
