@@ -42,7 +42,7 @@ class Train(Transform):
         # Create a classifier: a support vector classifier
         classifier = svm.SVC(gamma=0.001)
 
-        model = classifier.fit(X, y)
+        model = classifier.fit(X, y.values.ravel())
         with self.model.openbin() as f:
             pickle.dump(model, f)
 
