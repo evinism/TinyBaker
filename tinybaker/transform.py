@@ -11,7 +11,7 @@ from .exceptions import (
     ConfigurationError,
     UnusedFileWarning,
 )
-from .context import BakerContext, get_default_context
+from .context import BakerDriverContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 from .namespace_transforms import namespace_to_transform, dict_to_transform
@@ -44,7 +44,7 @@ class Transform(metaclass=TransformMeta):
 
     :param input_paths: Dictionary of input tags to files.
     :param output_paths: Dictionary of output tags to files.
-    :param optional context: The BakerContext to use for this transformation
+    :param optional context: The BakerDriverContext to use for this transformation
     :param optional overwrite: Whether or not to configure the transformation to overwrite output files on execution
     """
 
@@ -76,7 +76,6 @@ class Transform(metaclass=TransformMeta):
         self,
         input_paths: PathDict,
         output_paths: PathDict,
-        context: BakerContext = get_default_context(),
         overwrite: bool = False,
     ):
         _ensure_fileset_iff_fileset_tag(input_paths)
@@ -87,9 +86,8 @@ class Transform(metaclass=TransformMeta):
 
         self.input_files: FileDict = {}
         self.output_files: FileDict = {}
-        self.context = context
         self.overwrite = overwrite
-        self._current_run_info = None
+        self._current_worker_context = None
 
     @classproperty
     def input_tags(cls):
@@ -134,7 +132,7 @@ class Transform(metaclass=TransformMeta):
                             individual_path,
                             read_bit=True,
                             write_bit=False,
-                            run_info=self._current_run_info,
+                            worker_context=self._current_worker_context,
                         )
                     )
                 self.input_files[tag] = refset
@@ -143,7 +141,7 @@ class Transform(metaclass=TransformMeta):
                     input_paths[tag],
                     read_bit=True,
                     write_bit=False,
-                    run_info=self._current_run_info,
+                    worker_context=self._current_worker_context,
                 )
 
         for tag in output_paths:
@@ -155,7 +153,7 @@ class Transform(metaclass=TransformMeta):
                             individual_path,
                             read_bit=False,
                             write_bit=True,
-                            run_info=self._current_run_info,
+                            worker_context=self._current_worker_context,
                         )
                     )
                 self.output_files[tag] = refset
@@ -164,7 +162,7 @@ class Transform(metaclass=TransformMeta):
                     output_paths[tag],
                     read_bit=False,
                     write_bit=True,
-                    run_info=self._current_run_info,
+                    worker_context=self._current_worker_context,
                 )
 
     def _validate_file_existence(self):
@@ -228,20 +226,20 @@ class Transform(metaclass=TransformMeta):
         return cls.__name__
 
     def run(self):
-        """Run the transform instance"""
-        self.context.run_transform(self)
+        """Run the transform instance in the default context"""
+        get_default_context().run(self)
 
-    def _exec_with_run_info(self, run_info):
+    def _exec_with_worker_context(self, worker_context):
         # Set
         input_token = input_files_ctx.set(self.input_files)
         output_token = output_files_ctx.set(self.output_files)
         try:
-            self._current_run_info = run_info
+            self._current_worker_context = worker_context
             self._init_file_dicts(self.input_paths, self.output_paths)
             self._validate_file_existence()
-            if not run_info:
+            if not worker_context:
                 raise SeriousErrorThatYouShouldOpenAnIssueForIfYouGet(
-                    "No current run information, somehow!"
+                    "No current worker context, somehow!"
                 )
             self.script()
             self._warn_if_files_untouched()

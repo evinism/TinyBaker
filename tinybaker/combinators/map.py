@@ -137,11 +137,11 @@ def _create_tag_class(
                 self.output_files, _invert_mapping(self._output_mapping)
             )
             base_step = self._get_base_step()
-            base_step(
+            instance = base_step(
                 input_paths=input_paths,
                 output_paths=output_paths,
-                context=self.context,
                 overwrite=self.overwrite,
-            )._exec_with_run_info(self._current_run_info)
+            )
+            self._current_worker_context.execute([instance])
 
     return TagMapping

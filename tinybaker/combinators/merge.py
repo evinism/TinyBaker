@@ -85,10 +85,9 @@ def _create_merge_class(merge_steps, merge_input_tags, merge_output_tags, merge_
                     step(
                         input_files,
                         output_files,
-                        context=self.context,
                         overwrite=self.overwrite,
                     )
                 )
-            self.context.run_parallel(instances, self._current_run_info)
+            self._current_worker_context.execute(instances)
 
     return Merged

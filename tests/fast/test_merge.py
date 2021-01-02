@@ -1,4 +1,4 @@
-from tinybaker import sequence, merge, Transform, BakerContext, map_tags
+from tinybaker import sequence, merge, Transform, BakerDriverContext, map_tags
 from tinybaker.exceptions import TagConflictError
 import pytest
 
@@ -136,17 +136,18 @@ def test_multiprocessed_merge():
 
     Merged = merge([MP_StepOne, MP_StepTwo])
 
-    Merged(
-        input_paths={
-            "foo": "./tests/__data__/foo.txt",
-            "bloop": "./tests/__data__/bloop.txt",
-        },
-        output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
-        overwrite=True,
-        context=BakerContext(
-            parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
-        ),
-    ).run()
+    BakerDriverContext(
+        parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
+    ).run(
+        Merged(
+            input_paths={
+                "foo": "./tests/__data__/foo.txt",
+                "bloop": "./tests/__data__/bloop.txt",
+            },
+            output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
+            overwrite=True,
+        )
+    )
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"
@@ -170,15 +171,16 @@ def test_not_parallel_merge():
 
     Merged = merge([StepOne, StepTwo])
 
-    Merged(
-        input_paths={
-            "foo": "./tests/__data__/foo.txt",
-            "bloop": "./tests/__data__/bloop.txt",
-        },
-        output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
-        overwrite=True,
-        context=BakerContext(parallel_mode=None),
-    ).run()
+    BakerDriverContext(parallel_mode=None).run(
+        Merged(
+            input_paths={
+                "foo": "./tests/__data__/foo.txt",
+                "bloop": "./tests/__data__/bloop.txt",
+            },
+            output_paths={"bar": "/tmp/bar", "bleep": "/tmp/bleep"},
+            overwrite=True,
+        )
+    )
 
     with open("/tmp/bar", "r") as f:
         assert f.read() == "foo contents processed"

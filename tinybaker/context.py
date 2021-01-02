@@ -3,12 +3,26 @@ from fs.tempfs import TempFS
 from fs.osfs import OSFS
 from .exceptions import BakerError
 from .workarounds import is_fileset
-from .parallel import ProcessParallelizer, ThreadParallelizer, NonParallelizer
+from .parallel import (
+    ProcessParallelizer,
+    ThreadParallelizer,
+    NonParallelizer,
+    BaseParallelizer,
+)
+from collections import namedtuple
+
+BakerConfig = namedtuple(
+    "BakerConfig",
+    ["fs_for_intermediates", "parallel_mode", "max_threads", "max_processes"],
+)
 
 
-class RunInfo:
-    def __init__(self):
+class BakerWorkerContext:
+    # Intended to be shared between processes.
+    def __init__(self, baker_config: BakerConfig, parallelizer: BaseParallelizer):
         self.open_fses = {}
+        self.baker_config = baker_config
+        self.parallelizer = parallelizer
 
     def __enter__(self):
         self.open_fses = {
@@ -22,17 +36,21 @@ class RunInfo:
             fs = self.open_fses[prefix]
             fs.close()
 
-    # This defines what's shared between processes. Right now, the
-    # answer is "nothing", which we can get away with due to requiring
-    # nvtemp:// for multiprocessing.
+    def execute(self, instances):
+        if len(instances) == 1:
+            # If there's only one item, run it in the current thread.
+            NonParallelizer().run_parallel(instances, self)
+            return
+        self.parallelizer.run_parallel(instances, self)
+
+    # This defines what's shared between processes.
     def __reduce__(self):
-        return (RunInfo, ())
+        return (BakerWorkerContext, (self.baker_config, self.parallelizer))
 
 
-# TODO: This should probably exist only in the driver side.
-class BakerContext:
+class BakerDriverContext:
     """
-    Execution Context for running TinyBaker transforms
+    Driver Context for running TinyBaker transforms
 
     :param optional fs_for_intermediates:
         Which filesystem to use to store intermediates. You probably want this to be "temp" or "mem"
@@ -49,35 +67,34 @@ class BakerContext:
         max_processes=8,
         parallel_mode="multithreading",
     ):
-        self.fs_for_intermediates = fs_for_intermediates
-        self.max_threads = max_threads
-        self.max_processes = max_processes
-        self.parallel_mode = parallel_mode
-
         # If we're using multiprocessing, we HAVE to use nvtemp filesystem
         # for intermediates. This is until i get better at stuff.
         if parallel_mode == "multiprocessing" and fs_for_intermediates != "nvtemp":
             raise BakerError(
                 "Multiprocessing requires fs_for_intermediates of nvtemp (for nonvolatile temp)"
             )
+        self.baker_config = BakerConfig(
+            fs_for_intermediates, parallel_mode, max_threads, max_processes
+        )
 
-    def run_transform(self, transform):
-        run_info = RunInfo()
-        with run_info:
-            transform._exec_with_run_info(run_info)
-
-    def run_parallel(self, instances, run_info):
-        # TODO: Make the parallelizer live longer-term than just within this call
-        if self.parallel_mode == "multiprocessing":
-            par = ProcessParallelizer()
-        elif self.parallel_mode == "multithreading":
-            par = ThreadParallelizer()
+    def run(self, transform):
+        parallel_mode = self.baker_config.parallel_mode
+        if parallel_mode == "multiprocessing":
+            parallelizer = ProcessParallelizer()
+        elif parallel_mode == "multithreading":
+            parallelizer = ThreadParallelizer()
         else:
-            par = NonParallelizer()
-        return par.run_parallel(self, instances, run_info)
+            parallelizer = NonParallelizer()
+
+        worker_context = BakerWorkerContext(self.baker_config, parallelizer)
+        with worker_context:
+            worker_context.execute([transform])
+
+    def __reduce__(self):
+        raise NotImplementedError("Should not serialize and share driver object!")
 
 
-_default_context = BakerContext()
+_default_context = BakerDriverContext()
 
 
 def get_default_context():
