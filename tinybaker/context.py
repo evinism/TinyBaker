@@ -3,11 +3,11 @@ from fs.tempfs import TempFS
 from fs.osfs import OSFS
 from .exceptions import BakerError
 from .workarounds import is_fileset
-from .parallel import (
-    ProcessParallelizer,
-    ThreadParallelizer,
-    NonParallelizer,
-    BaseParallelizer,
+from .scheduler import (
+    SerialScheduler,
+    ProcessScheduler,
+    ThreadScheduler,
+    BaseScheduler,
 )
 from collections import namedtuple
 
@@ -19,10 +19,10 @@ BakerConfig = namedtuple(
 
 class BakerWorkerContext:
     # Intended to be shared between processes.
-    def __init__(self, baker_config: BakerConfig, parallelizer: BaseParallelizer):
+    def __init__(self, baker_config: BakerConfig, scheduler: BaseScheduler):
         self.open_fses = {}
         self.baker_config = baker_config
-        self.parallelizer = parallelizer
+        self.scheduler = scheduler
 
     def __enter__(self):
         self.open_fses = {
@@ -39,13 +39,13 @@ class BakerWorkerContext:
     def execute(self, instances):
         if len(instances) == 1:
             # If there's only one item, run it in the current thread.
-            NonParallelizer().run_parallel(instances, self)
+            SerialScheduler().run_parallel(instances, self)
             return
-        self.parallelizer.run_parallel(instances, self)
+        self.scheduler.run_parallel(instances, self)
 
     # This defines what's shared between processes.
     def __reduce__(self):
-        return (BakerWorkerContext, (self.baker_config, self.parallelizer))
+        return (BakerWorkerContext, (self.baker_config, self.scheduler))
 
 
 class BakerDriverContext:
@@ -76,17 +76,20 @@ class BakerDriverContext:
         self.baker_config = BakerConfig(
             fs_for_intermediates, parallel_mode, max_threads, max_processes
         )
+        self.scheduler = self._get_scheduler(parallel_mode)
+
+    @staticmethod
+    def _get_scheduler(parallel_mode):
+        if parallel_mode == "multiprocessing":
+            scheduler = ProcessScheduler()
+        elif parallel_mode == "multithreading":
+            scheduler = ThreadScheduler()
+        else:
+            scheduler = SerialScheduler()
+        return scheduler
 
     def run(self, transform):
-        parallel_mode = self.baker_config.parallel_mode
-        if parallel_mode == "multiprocessing":
-            parallelizer = ProcessParallelizer()
-        elif parallel_mode == "multithreading":
-            parallelizer = ThreadParallelizer()
-        else:
-            parallelizer = NonParallelizer()
-
-        worker_context = BakerWorkerContext(self.baker_config, parallelizer)
+        worker_context = BakerWorkerContext(self.baker_config, self.scheduler)
         with worker_context:
             worker_context.execute([transform])
 
