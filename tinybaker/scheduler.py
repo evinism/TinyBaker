@@ -4,13 +4,13 @@ from multiprocessing import Pool
 from queue import Queue
 
 
-class BaseParallelizer(ABC):
+class BaseScheduler(ABC):
     @abstractmethod
     def run_parallel(self, instances, current_worker_context):
         pass
 
 
-class ThreadParallelizer(BaseParallelizer):
+class ThreadScheduler(BaseScheduler):
     class ParallelWorker(Thread):
         def __init__(self, queue):
             Thread.__init__(self)
@@ -30,7 +30,7 @@ class ThreadParallelizer(BaseParallelizer):
             len(instances), current_worker_context.baker_config.max_threads
         )
         for _ in range(parallelism):
-            worker = ThreadParallelizer.ParallelWorker(queue)
+            worker = ThreadScheduler.ParallelWorker(queue)
             worker.daemon = True
             worker.start()
 
@@ -39,7 +39,7 @@ class ThreadParallelizer(BaseParallelizer):
         queue.join()
 
 
-class ProcessParallelizer(BaseParallelizer):
+class ProcessScheduler(BaseScheduler):
     @staticmethod
     def _mp_run(arg):
         instance, current_worker_context = arg
@@ -54,7 +54,7 @@ class ProcessParallelizer(BaseParallelizer):
             pool.map(self._mp_run, mp_args)
 
 
-class NonParallelizer(BaseParallelizer):
+class SerialScheduler(BaseScheduler):
     def run_parallel(self, instances, current_worker_context):
         for instance in instances:
             instance._exec_with_worker_context(current_worker_context)
