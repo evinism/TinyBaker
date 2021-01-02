@@ -3,7 +3,12 @@ from fs.tempfs import TempFS
 from fs.osfs import OSFS
 from .exceptions import BakerError
 from .workarounds import is_fileset
-from .parallel import ProcessParallelizer, ThreadParallelizer, NonParallelizer
+from .parallel import (
+    ProcessParallelizer,
+    ThreadParallelizer,
+    NonParallelizer,
+    BaseParallelizer,
+)
 from collections import namedtuple
 
 BakerConfig = namedtuple(
@@ -13,9 +18,11 @@ BakerConfig = namedtuple(
 
 
 class BakerWorkerContext:
-    def __init__(self, baker_config: BakerConfig):
+    # Intended to be shared between processes.
+    def __init__(self, baker_config: BakerConfig, parallelizer: BaseParallelizer):
         self.open_fses = {}
         self.baker_config = baker_config
+        self.parallelizer = parallelizer
 
     def __enter__(self):
         self.open_fses = {
@@ -32,21 +39,13 @@ class BakerWorkerContext:
     def execute(self, instances):
         if len(instances) == 1:
             # If there's only one item, run it in the current thread.
-            return NonParallelizer().run_parallel(instances, self)
-
-        parallel_mode = self.baker_config.parallel_mode
-        # TODO: Make the parallelizer live longer-term than just within this call
-        if parallel_mode == "multiprocessing":
-            par = ProcessParallelizer()
-        elif parallel_mode == "multithreading":
-            par = ThreadParallelizer()
-        else:
-            par = NonParallelizer()
-        return par.run_parallel(instances, self)
+            NonParallelizer().run_parallel(instances, self)
+            return
+        self.parallelizer.run_parallel(instances, self)
 
     # This defines what's shared between processes.
     def __reduce__(self):
-        return (BakerWorkerContext, (self.baker_config,))
+        return (BakerWorkerContext, (self.baker_config, self.parallelizer))
 
 
 class BakerDriver:
@@ -79,7 +78,15 @@ class BakerDriver:
         )
 
     def run(self, transform):
-        worker_context = BakerWorkerContext(self.baker_config)
+        parallel_mode = self.baker_config.parallel_mode
+        if parallel_mode == "multiprocessing":
+            parallelizer = ProcessParallelizer()
+        elif parallel_mode == "multithreading":
+            parallelizer = ThreadParallelizer()
+        else:
+            parallelizer = NonParallelizer()
+
+        worker_context = BakerWorkerContext(self.baker_config, parallelizer)
         with worker_context:
             worker_context.execute([transform])
 

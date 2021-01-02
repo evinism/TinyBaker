@@ -4,16 +4,13 @@ from multiprocessing import Pool
 from queue import Queue
 
 
-class ParalellizerBase(ABC):
+class BaseParallelizer(ABC):
     @abstractmethod
     def run_parallel(self, instances, current_worker_context):
         pass
 
-    def __reduce__(self):
-        raise NotImplementedError("We really shouldn't be pickling parallelizers")
 
-
-class ThreadParallelizer(ParalellizerBase):
+class ThreadParallelizer(BaseParallelizer):
     class ParallelWorker(Thread):
         def __init__(self, queue):
             Thread.__init__(self)
@@ -42,7 +39,7 @@ class ThreadParallelizer(ParalellizerBase):
         queue.join()
 
 
-class ProcessParallelizer(ParalellizerBase):
+class ProcessParallelizer(BaseParallelizer):
     @staticmethod
     def _mp_run(arg):
         instance, current_worker_context = arg
@@ -57,7 +54,7 @@ class ProcessParallelizer(ParalellizerBase):
             pool.map(self._mp_run, mp_args)
 
 
-class NonParallelizer(ParalellizerBase):
+class NonParallelizer(BaseParallelizer):
     def run_parallel(self, instances, current_worker_context):
         for instance in instances:
             instance._exec_with_worker_context(current_worker_context)

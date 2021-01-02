@@ -157,7 +157,7 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
 
             # Phase 2: Run instances
             for instance in instances:
-                instance._exec_with_worker_context(self._current_worker_context)
+                self._current_worker_context.execute([instance])
 
     return Sequence
 
