@@ -11,7 +11,7 @@ from .exceptions import (
     ConfigurationError,
     UnusedFileWarning,
 )
-from .context import BakerDriver, get_default_context
+from .context import BakerDriverContext, get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 from .namespace_transforms import namespace_to_transform, dict_to_transform
@@ -44,7 +44,7 @@ class Transform(metaclass=TransformMeta):
 
     :param input_paths: Dictionary of input tags to files.
     :param output_paths: Dictionary of output tags to files.
-    :param optional context: The BakerDriver to use for this transformation
+    :param optional context: The BakerDriverContext to use for this transformation
     :param optional overwrite: Whether or not to configure the transformation to overwrite output files on execution
     """
 

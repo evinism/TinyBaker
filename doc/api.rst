@@ -17,7 +17,7 @@ API reference
 
 .. autofunction:: cli
 
-.. autoclass:: BakerDriver
+.. autoclass:: BakerDriverContext
 
 
 :mod:`tinybaker.fileref`

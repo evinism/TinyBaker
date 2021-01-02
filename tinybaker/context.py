@@ -48,7 +48,7 @@ class BakerWorkerContext:
         return (BakerWorkerContext, (self.baker_config, self.parallelizer))
 
 
-class BakerDriver:
+class BakerDriverContext:
     """
     Driver Context for running TinyBaker transforms
 
@@ -94,7 +94,7 @@ class BakerDriver:
         raise NotImplementedError("Should not serialize and share driver object!")
 
 
-_default_context = BakerDriver()
+_default_context = BakerDriverContext()
 
 
 def get_default_context():

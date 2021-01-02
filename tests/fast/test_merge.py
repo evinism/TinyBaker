@@ -1,4 +1,4 @@
-from tinybaker import sequence, merge, Transform, BakerDriver, map_tags
+from tinybaker import sequence, merge, Transform, BakerDriverContext, map_tags
 from tinybaker.exceptions import TagConflictError
 import pytest
 
@@ -136,7 +136,7 @@ def test_multiprocessed_merge():
 
     Merged = merge([MP_StepOne, MP_StepTwo])
 
-    BakerDriver(
+    BakerDriverContext(
         parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
     ).run(
         Merged(
@@ -171,7 +171,7 @@ def test_not_parallel_merge():
 
     Merged = merge([StepOne, StepTwo])
 
-    BakerDriver(parallel_mode=None).run(
+    BakerDriverContext(parallel_mode=None).run(
         Merged(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",
