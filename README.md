@@ -58,12 +58,12 @@ TinyBaker calls the labels associated which each input / output file a `tag`.
 We might want to configure where we store input/output files, or configure files to come from separate filesystems entirely. TinyBaker allows you to define the transform while paying attention to only the tags, even when accessing files across multiple filesystems.
 
 ```
-                                       ___________
-ftp://path/to/config >--[ config ]--->|           |
-                                      |           |->--[ predictions ]---> ./output.pkl
-/path/to/model.pkl >----[ model ]---->|  Predict  |
-                                      |           |->--[ performance ]---> ./performance.pkl
-/path/to/data.pkl >-----[ data ]----->|___________|
+                                        ___________
+/path/to/config.json >----[ config ]-->|           |
+                                       |           |->--[ predictions ]---> hdfs://outputs/predictions.csv
+s3://path/to/model.pkl >--[ model ]--->|  Predict  |
+                                       |           |->--[ performance ]---> ./performance.pkl
+/path/to/data.csv >-------[ data ]---->|___________|
 ```
 
 We can imagine a situation where we have file transformations that could theoretically compose:
