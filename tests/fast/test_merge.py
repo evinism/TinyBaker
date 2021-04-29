@@ -136,9 +136,7 @@ def test_multiprocessed_merge():
 
     Merged = merge([MP_StepOne, MP_StepTwo])
 
-    BakerDriverContext(
-        parallel_mode="multiprocessing", fs_for_intermediates="nvtemp"
-    ).run(
+    BakerDriverContext(parallel_mode="multiprocessing").run(
         Merged(
             input_paths={
                 "foo": "./tests/__data__/foo.txt",

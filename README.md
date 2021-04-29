@@ -196,7 +196,7 @@ if __name__ == "__main__":
 ```
 
 ### Operating over multiple filesystems
-Since TinyBaker uses [pyfilesystem2](https://docs.pyfilesystem.org/en/latest/) as its filesystem, TinyBaker can use [any filesystem that pyfilesystem2 supports](https://www.pyfilesystem.org/page/index-of-filesystems/). For example, you can enable support for s3 via installing `https://github.com/PyFilesystem/s3fs`.
+Since TinyBaker uses [fsspec](https://filesystem-spec.readthedocs.io/en/latest/index.html/) as its filesystem, TinyBaker can use [any filesystem that fsspec supports](https://filesystem-spec.readthedocs.io/en/latest/api.html#built-in-implementations). For example, you can use s3 via setting the protocol of files to `s3://`
 
 This makes building test suites for transforms very easy: test suites can operate off of local data, but production jobs can run off of s3 data.
 

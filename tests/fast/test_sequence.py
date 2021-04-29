@@ -1,4 +1,3 @@
-import pytest
 from tinybaker import sequence, Transform, InputTag, OutputTag
 from tinybaker.context import BakerDriverContext
 
@@ -53,7 +52,7 @@ def test_sequence():
 
 
 def test_in_memory_intermediates():
-    in_memory_context = BakerDriverContext(fs_for_intermediates="mem")
+    in_memory_context = BakerDriverContext(fs_for_intermediates="memory")
 
     class StepOne(Transform):
         foo = InputTag("foo")

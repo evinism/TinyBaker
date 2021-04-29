@@ -1,8 +1,4 @@
-from fs.memoryfs import MemoryFS
-from fs.tempfs import TempFS
-from fs.osfs import OSFS
-from .exceptions import BakerError
-from .workarounds import is_fileset
+import uuid
 from .scheduler import (
     SerialScheduler,
     ProcessScheduler,
@@ -10,6 +6,8 @@ from .scheduler import (
     BaseScheduler,
 )
 from collections import namedtuple
+
+from fsspec.implementations.local import LocalFileSystem
 
 BakerConfig = namedtuple(
     "BakerConfig",
@@ -19,22 +17,24 @@ BakerConfig = namedtuple(
 
 class BakerWorkerContext:
     # Intended to be shared between processes.
-    def __init__(self, baker_config: BakerConfig, scheduler: BaseScheduler):
-        self.open_fses = {}
+    def __init__(
+        self, baker_config: BakerConfig, scheduler: BaseScheduler, run_id=None
+    ):
         self.baker_config = baker_config
         self.scheduler = scheduler
+        self.run_id = run_id
+        if self.run_id is None:
+            self.run_id = uuid.uuid4().hex
+        self.tmp_path = f"/tmp/tinybaker/run-{self.run_id}"
 
     def __enter__(self):
-        self.open_fses = {
-            "mem": MemoryFS(),
-            "temp": TempFS(),
-            "nvtemp": OSFS("/tmp/tinybaker-nv-temp", create=True),
-        }
+        pass
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for prefix in self.open_fses:
-            fs = self.open_fses[prefix]
-            fs.close()
+    def __exit__(self, *_):
+        # cleanup!
+        fs = LocalFileSystem()
+        if fs.exists(self.tmp_path):
+            fs.rm(self.tmp_path, recursive=True)
 
     def execute(self, instances):
         if len(instances) == 1:
@@ -45,7 +45,7 @@ class BakerWorkerContext:
 
     # This defines what's shared between processes.
     def __reduce__(self):
-        return (BakerWorkerContext, (self.baker_config, self.scheduler))
+        return (BakerWorkerContext, (self.baker_config, self.scheduler, self.run_id))
 
 
 class BakerDriverContext:
@@ -53,7 +53,7 @@ class BakerDriverContext:
     Driver Context for running TinyBaker transforms
 
     :param optional fs_for_intermediates:
-        Which filesystem to use to store intermediates. You probably want this to be "temp" or "mem"
+        Which filesystem to use to store intermediates. You probably want this to be "file" or "memory"
     :param optional max_threads: The max number of threads that TinyBaker can spawn.
     :param optional parallel_mode:
         What parallelism mode to run TinyBaker in. Options are None and "multithreading". These will
@@ -62,17 +62,11 @@ class BakerDriverContext:
 
     def __init__(
         self,
-        fs_for_intermediates="temp",
+        fs_for_intermediates="file",
         max_threads=8,
         max_processes=8,
         parallel_mode="multithreading",
     ):
-        # If we're using multiprocessing, we HAVE to use nvtemp filesystem
-        # for intermediates. This is until i get better at stuff.
-        if parallel_mode == "multiprocessing" and fs_for_intermediates != "nvtemp":
-            raise BakerError(
-                "Multiprocessing requires fs_for_intermediates of nvtemp (for nonvolatile temp)"
-            )
         self.baker_config = BakerConfig(
             fs_for_intermediates, parallel_mode, max_threads, max_processes
         )
