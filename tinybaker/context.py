@@ -1,4 +1,4 @@
-from .exceptions import BakerError
+import uuid
 from .scheduler import (
     SerialScheduler,
     ProcessScheduler,
@@ -6,6 +6,8 @@ from .scheduler import (
     BaseScheduler,
 )
 from collections import namedtuple
+
+from fsspec.implementations.local import LocalFileSystem
 
 BakerConfig = namedtuple(
     "BakerConfig",
@@ -15,10 +17,24 @@ BakerConfig = namedtuple(
 
 class BakerWorkerContext:
     # Intended to be shared between processes.
-    def __init__(self, baker_config: BakerConfig, scheduler: BaseScheduler):
-        self.open_fses = {}
+    def __init__(
+        self, baker_config: BakerConfig, scheduler: BaseScheduler, run_id=None
+    ):
         self.baker_config = baker_config
         self.scheduler = scheduler
+        self.run_id = run_id
+        if self.run_id is None:
+            self.run_id = uuid.uuid4().hex
+        self.tmp_path = f"/tmp/tinybaker/run-{self.run_id}"
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *_):
+        # cleanup!
+        fs = LocalFileSystem()
+        if fs.exists(self.tmp_path):
+            fs.rm(self.tmp_path, recursive=True)
 
     def execute(self, instances):
         if len(instances) == 1:
@@ -29,7 +45,7 @@ class BakerWorkerContext:
 
     # This defines what's shared between processes.
     def __reduce__(self):
-        return (BakerWorkerContext, (self.baker_config, self.scheduler))
+        return (BakerWorkerContext, (self.baker_config, self.scheduler, self.run_id))
 
 
 class BakerDriverContext:
@@ -68,7 +84,8 @@ class BakerDriverContext:
 
     def run(self, transform):
         worker_context = BakerWorkerContext(self.baker_config, self.scheduler)
-        worker_context.execute([transform])
+        with worker_context:
+            worker_context.execute([transform])
 
     def __reduce__(self):
         raise NotImplementedError("Should not serialize and share driver object!")
