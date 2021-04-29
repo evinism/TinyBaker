@@ -81,7 +81,9 @@ def _build_sequence_class(seq_input_tags, seq_output_tags, seq_steps, seq_name):
 
         def _generate_temp_filename(self, sid):
             target_fs = self._current_worker_context.baker_config.fs_for_intermediates
-            return "{}://tinybaker-{}__{}".format(target_fs, sid, uuid4())
+            return "{}:///tmp/tinybaker/tinybaker-{}__{}".format(
+                target_fs, sid, uuid4()
+            )
 
         @classmethod
         def structure(cls):

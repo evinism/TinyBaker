@@ -1,10 +1,9 @@
 from typing import Union
-from fs import open_fs
-from fs.opener.parse import parse_fs_url
 from .exceptions import SeriousErrorThatYouShouldOpenAnIssueForIfYouGet
 from io import BufferedWriter, BufferedReader, TextIOWrapper, StringIO, BytesIO
 from base64 import b64decode
 from .exceptions import BakerError
+import fsspec
 
 
 def get_fname(path):
@@ -42,12 +41,12 @@ class FileRef:
         if self._get_protocol() == "data":
             return True
 
-        filesystem, resource, should_close = self._get_fs_and_path()
         try:
-            return filesystem.exists(resource)
-        finally:
-            if should_close:
-                filesystem.close()
+            with fsspec.open(self.path):
+                pass
+        except:
+            return False
+        return True
 
     def open(self) -> TextIOWrapper:
         """
@@ -87,35 +86,16 @@ class FileRef:
             else:
                 return StringIO(initial_value=data.decode("utf-8"))
 
-        filesystem, resource, should_close = self._get_fs_and_path()
-        try:
-            mode = ""
-            if self._read:
-                mode = mode + "r"
-            if self._write:
-                mode = mode + "w"
-            method = filesystem.openbin if bin else filesystem.open
-            return method(resource, mode)
-        finally:
-            if should_close:
-                filesystem.close()
-
-    def _get_fs_and_path(self):
-        # Annoyingly, relative dirs are not parsed well by parse_fs_url
-        protocol = self._get_protocol()
-        if protocol in self.worker_context.open_fses:
-            # pre-opened case
-            parsed = parse_fs_url(self.path)
-            fs = self.worker_context.open_fses[protocol]
-            fname = parsed.resource
-            should_close = False
-        else:
-            # self-managed case
-            fname = get_fname(self.path)
-            truncated_path = get_truncated_path(self.path, fname)
-            fs = open_fs(truncated_path)
-            should_close = True
-        return (fs, fname, should_close)
+        mode = ""
+        if self._read:
+            mode = mode + "r"
+        if self._write:
+            mode = mode + "w"
+        if bin:
+            mode = mode + "b"
+        return fsspec.open(self.path, mode)
 
     def _get_protocol(self):
-        return self.path.split("://")[0]
+        if "://" in self.path:
+            return self.path.split("://")[0]
+        return None
