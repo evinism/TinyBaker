@@ -1,6 +1,5 @@
-from fs import open_fs
 from typing import Dict, Set, Union, List, Iterable, Any
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from .fileref import FileRef
 from .workarounds import is_fileset
 from .exceptions import (
@@ -11,7 +10,7 @@ from .exceptions import (
     ConfigurationError,
     UnusedFileWarning,
 )
-from .context import BakerDriverContext, get_default_context
+from .context import get_default_context
 from .util import get_files_in_path_dict, classproperty
 from typeguard import typechecked
 from .namespace_transforms import namespace_to_transform, dict_to_transform
