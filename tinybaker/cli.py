@@ -28,7 +28,7 @@ def _build_parser(TF: TransformMeta):
             help="Path for output tag {}".format(tag),
         )
 
-    parser.add_argument("--version", action="version", version="%(prog)s 0.3.2")
+    parser.add_argument("--version", action="version", version="%(prog)s 0.4.0")
     parser.add_argument(
         "--overwrite",
         dest="__overwrite__",
